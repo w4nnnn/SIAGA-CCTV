@@ -8,13 +8,33 @@ import {
   Edit3,
   Loader2,
   Save,
-  X,
 } from "lucide-react";
 import {
   HistoryEditDraft,
   updateHistoryEditDraftStatus,
 } from "@/lib/ui-state";
 import { updateHistoricalReportAction } from "@/server/actions/report.actions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export interface ReportHistoryItem {
   id: string;
@@ -31,14 +51,14 @@ export function ReportHistoryTable({
   items: ReportHistoryItem[];
 }) {
   const router = useRouter();
-  const [editingDraft, setEditingDraft] = useState<HistoryEditDraft | null>(
-    null
-  );
+  const [editingItem, setEditingItem] = useState<ReportHistoryItem | null>(null);
+  const [editingDraft, setEditingDraft] = useState<HistoryEditDraft | null>(null);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const startEdit = (item: ReportHistoryItem) => {
+  const openEditDialog = (item: ReportHistoryItem) => {
     setErrorMessage(null);
+    setEditingItem(item);
     setEditingDraft({
       reportId: item.id,
       status: item.status,
@@ -46,17 +66,23 @@ export function ReportHistoryTable({
     });
   };
 
-  const handleSaveEdit = (reportId: string) => {
+  const closeEditDialog = () => {
+    setEditingItem(null);
+    setEditingDraft(null);
+    setErrorMessage(null);
+  };
+
+  const handleSaveEdit = () => {
     if (!editingDraft) return;
     setErrorMessage(null);
 
     startTransition(async () => {
       try {
-        await updateHistoricalReportAction(reportId, {
+        await updateHistoricalReportAction(editingDraft.reportId, {
           status: editingDraft.status,
           notes: editingDraft.status === "OFF" ? editingDraft.notes : null,
         });
-        setEditingDraft(null);
+        closeEditDialog();
         router.refresh();
       } catch (err) {
         setErrorMessage(
@@ -68,9 +94,11 @@ export function ReportHistoryTable({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-8 text-center text-sm text-[var(--color-muted-foreground)]">
-        Belum ada riwayat laporan yang tersimpan.
-      </div>
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          Belum ada riwayat laporan yang tersimpan.
+        </CardContent>
+      </Card>
     );
   }
 
@@ -79,159 +107,192 @@ export function ReportHistoryTable({
       {errorMessage && (
         <div
           role="alert"
-          className="rounded-lg border border-red-500/40 bg-red-500/10 p-3.5 text-sm font-medium text-red-600 dark:text-red-400"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3.5 text-sm font-medium text-destructive"
         >
           {errorMessage}
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]">
-        <table className="w-full border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border)] bg-[var(--color-muted)] text-xs uppercase tracking-wider text-[var(--color-muted-foreground)]">
-              <th className="px-4 py-3.5 font-semibold">Tanggal</th>
-              <th className="px-4 py-3.5 font-semibold">Lokasi</th>
-              <th className="px-4 py-3.5 font-semibold">Status</th>
-              <th className="px-4 py-3.5 font-semibold">Catatan Kendala</th>
-              <th className="px-4 py-3.5 text-right font-semibold">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border)]">
-            {items.map((item) => {
-              const isEditing = editingDraft?.reportId === item.id;
-              return (
-                <tr key={item.id} className="align-top">
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-sm">
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-semibold">Tanggal</TableHead>
+                <TableHead className="font-semibold">Lokasi</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Catatan Kendala</TableHead>
+                <TableHead className="text-right font-semibold">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="whitespace-nowrap font-mono text-sm">
                     {item.reportDate}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 font-mono font-semibold">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap font-mono font-semibold">
                     {item.displayName}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    {isEditing ? (
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEditingDraft(
-                              updateHistoryEditDraftStatus(editingDraft, "ON")
-                            )
-                          }
-                          className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 ${
-                            editingDraft.status === "ON"
-                              ? "bg-[var(--color-accent)] text-[var(--color-on-accent)]"
-                              : "border border-[var(--color-border)] bg-[var(--color-background)]"
-                          }`}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>ON</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEditingDraft(
-                              updateHistoryEditDraftStatus(editingDraft, "OFF")
-                            )
-                          }
-                          className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 ${
-                            editingDraft.status === "OFF"
-                              ? "bg-[var(--color-destructive)] text-white"
-                              : "border border-[var(--color-border)] bg-[var(--color-background)]"
-                          }`}
-                        >
-                          <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>Ada Kendala / OFF</span>
-                        </button>
-                      </div>
-                    ) : item.status === "ON" ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  </TableCell>
+                  <TableCell>
+                    {item.status === "ON" ? (
+                      <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300">
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>ON</span>
-                      </span>
+                      </Badge>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">
+                      <Badge
+                        variant="destructive"
+                        className="gap-1.5 bg-destructive/15 text-destructive hover:bg-destructive/20"
+                      >
                         <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>Ada Kendala / OFF</span>
-                      </span>
+                      </Badge>
                     )}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    {isEditing ? (
-                      editingDraft.status === "OFF" ? (
-                        <div>
-                          <label
-                            htmlFor={`edit-notes-${item.id}`}
-                            className="sr-only"
-                          >
-                            Catatan Kendala
-                          </label>
-                          <input
-                            id={`edit-notes-${item.id}`}
-                            type="text"
-                            value={editingDraft.notes}
-                            onChange={(e) =>
-                              setEditingDraft({
-                                ...editingDraft,
-                                notes: e.target.value,
-                              })
-                            }
-                            placeholder="Catatan kendala (opsional)"
-                            className="min-h-[44px] w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)]"
-                          />
-                        </div>
-                      ) : (
-                        <span className="text-xs italic text-[var(--color-muted-foreground)]">
-                          Catatan otomatis dihapus karena status ON
-                        </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {item.notes ?? "-"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDialog(item)}
+                      className="cursor-pointer gap-1.5"
+                    >
+                      <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Edit</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog
+        open={Boolean(editingItem)}
+        onOpenChange={(open) => {
+          if (!open) closeEditDialog();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-mono text-lg font-bold">
+              Edit Laporan: {editingItem?.displayName}
+            </DialogTitle>
+            <DialogDescription>
+              Tanggal Laporan:{" "}
+              <span className="font-mono font-medium text-foreground">
+                {editingItem?.reportDate}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingDraft && (
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>Pilih Status CCTV</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant={editingDraft.status === "ON" ? "default" : "outline"}
+                    onClick={() =>
+                      setEditingDraft(
+                        updateHistoryEditDraftStatus(editingDraft, "ON")
                       )
-                    ) : (
-                      <span className="text-[var(--color-muted-foreground)]">
-                        {item.notes ?? "-"}
-                      </span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right">
-                    {isEditing ? (
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={isPending}
-                          onClick={() => handleSaveEdit(item.id)}
-                          className="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-2 text-xs font-semibold text-[var(--color-on-accent)]"
-                        >
-                          {isPending ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                          ) : (
-                            <Save className="h-3.5 w-3.5" aria-hidden="true" />
-                          )}
-                          <span>Simpan</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingDraft(null)}
-                          className="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs font-medium"
-                        >
-                          <X className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>Batal</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => startEdit(item)}
-                        className="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-xs font-semibold text-[var(--color-foreground)] transition-colors duration-200 hover:bg-[var(--color-muted)]"
-                      >
-                        <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Edit</span>
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    }
+                    className={`min-h-[44px] cursor-pointer gap-2 ${
+                      editingDraft.status === "ON"
+                        ? "bg-emerald-600 font-semibold text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                        : ""
+                    }`}
+                  >
+                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                    <span>ON</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={
+                      editingDraft.status === "OFF" ? "destructive" : "outline"
+                    }
+                    onClick={() =>
+                      setEditingDraft(
+                        updateHistoryEditDraftStatus(editingDraft, "OFF")
+                      )
+                    }
+                    className={`min-h-[44px] cursor-pointer gap-2 ${
+                      editingDraft.status === "OFF"
+                        ? "bg-destructive font-semibold text-white hover:bg-destructive/90"
+                        : ""
+                    }`}
+                  >
+                    <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                    <span>Ada Kendala / OFF</span>
+                  </Button>
+                </div>
+              </div>
+
+              {editingDraft.status === "OFF" ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="dialog-edit-notes">
+                    Catatan Kendala (Opsional)
+                  </Label>
+                  <Textarea
+                    id="dialog-edit-notes"
+                    rows={3}
+                    value={editingDraft.notes}
+                    onChange={(e) =>
+                      setEditingDraft({
+                        ...editingDraft,
+                        notes: e.target.value,
+                      })
+                    }
+                    placeholder="Contoh: Off 3 titik atau kamera area dermaga mati..."
+                  />
+                </div>
+              ) : (
+                <p className="rounded-lg border border-border bg-muted/50 p-2.5 text-xs text-muted-foreground italic">
+                  Catatan kendala otomatis dihapus saat status diubah menjadi ON.
+                </p>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isPending}
+              onClick={closeEditDialog}
+              className="cursor-pointer"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              onClick={handleSaveEdit}
+              className="cursor-pointer gap-2 bg-emerald-600 font-semibold text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                  <span>Simpan Perubahan</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
