@@ -9,6 +9,7 @@ import {
   getNavigationItemsForRole,
   updateHistoryEditDraftStatus,
   toggleLocationIdInSelection,
+  getTodayDateInJakarta,
 } from "../../src/lib/ui-state";
 
 describe("ui-state helpers for batch form, theme, & export URLs", () => {
@@ -120,5 +121,14 @@ describe("ui-state helpers for batch form, theme, & export URLs", () => {
     expect(toggleLocationIdInSelection(["loc-1", "loc-2"], "loc-1")).toEqual([
       "loc-2",
     ]);
+  });
+});
+
+describe("getTodayDateInJakarta", () => {
+  it("memakai tanggal WIB, bukan UTC, saat lewat tengah malam WIB", () => {
+    // 2026-11-01 18:30 UTC = 2026-11-02 01:30 WIB
+    expect(getTodayDateInJakarta(new Date("2026-11-01T18:30:00Z"))).toBe("2026-11-02");
+    // 2026-11-02 16:59 UTC = 2026-11-02 23:59 WIB
+    expect(getTodayDateInJakarta(new Date("2026-11-02T16:59:00Z"))).toBe("2026-11-02");
   });
 });

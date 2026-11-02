@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { auth, SessionUser } from "@/lib/auth";
+import { getTodayDateInJakarta } from "@/lib/ui-state";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { DailyMonitoringBoard } from "@/components/admin/DailyMonitoringBoard";
 import {
@@ -23,7 +24,7 @@ export default async function AdminDashboardPage({
   }
 
   const params = await searchParams;
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateInJakarta();
   const reportDate =
     params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date)
       ? params.date

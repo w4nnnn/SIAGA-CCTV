@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { auth, SessionUser } from "@/lib/auth";
+import { getTodayDateInJakarta } from "@/lib/ui-state";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { DateRangeRecapView } from "@/components/admin/DateRangeRecapView";
 import { listLocations } from "@/server/services/location.service";
@@ -26,11 +27,8 @@ export default async function AdminRecapPage({
   }
 
   const params = await searchParams;
-  const now = new Date();
-  const firstDayOfMonth = `${now.getUTCFullYear()}-${String(
-    now.getUTCMonth() + 1
-  ).padStart(2, "0")}-01`;
-  const todayStr = now.toISOString().slice(0, 10);
+  const todayStr = getTodayDateInJakarta();
+  const firstDayOfMonth = `${todayStr.slice(0, 7)}-01`;
 
   const startDate =
     params.startDate && /^\d{4}-\d{2}-\d{2}$/.test(params.startDate)
