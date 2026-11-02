@@ -8,6 +8,7 @@ import {
   resolveInitialTheme,
   getNavigationItemsForRole,
   updateHistoryEditDraftStatus,
+  toggleLocationIdInSelection,
 } from "../../src/lib/ui-state";
 
 describe("ui-state helpers for batch form, theme, & export URLs", () => {
@@ -109,5 +110,15 @@ describe("ui-state helpers for batch form, theme, & export URLs", () => {
     const nextDraft = updateHistoryEditDraftStatus(draft, "ON");
     expect(nextDraft.status).toBe("ON");
     expect(nextDraft.notes).toBe("");
+  });
+
+  it("menambah atau menghapus locationId pada pilihan multi-lokasi petugas", () => {
+    expect(toggleLocationIdInSelection(["loc-1"], "loc-2")).toEqual([
+      "loc-1",
+      "loc-2",
+    ]);
+    expect(toggleLocationIdInSelection(["loc-1", "loc-2"], "loc-1")).toEqual([
+      "loc-2",
+    ]);
   });
 });

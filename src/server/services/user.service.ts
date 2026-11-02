@@ -1,8 +1,54 @@
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { userLocations, users } from "@/db/schema";
+import { locations, userLocations, users } from "@/db/schema";
+import { formatLocationDisplayName } from "@/lib/format";
 import { userInputSchema } from "@/lib/validators";
+
+export async function listUsersWithLocations() {
+  const userRows = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      name: users.name,
+      role: users.role,
+      isActive: users.isActive,
+    })
+    .from(users)
+    .orderBy(asc(users.role), asc(users.username));
+
+  const mappingRows = await db
+    .select({
+      userId: userLocations.userId,
+      locationId: userLocations.locationId,
+      category: locations.category,
+      name: locations.name,
+    })
+    .from(userLocations)
+    .innerJoin(locations, eq(userLocations.locationId, locations.id));
+
+  const mapByUser = new Map<
+    string,
+    Array<{ locationId: string; displayName: string }>
+  >();
+
+  for (const row of mappingRows) {
+    const arr = mapByUser.get(row.userId) ?? [];
+    arr.push({
+      locationId: row.locationId,
+      displayName: formatLocationDisplayName({
+        category: row.category,
+        name: row.name,
+      }),
+    });
+    mapByUser.set(row.userId, arr);
+  }
+
+  return userRows.map((u) => ({
+    ...u,
+    assignedLocations: mapByUser.get(u.id) ?? [],
+  }));
+}
 
 export async function getUserAssignedLocationIds(
   userId: string

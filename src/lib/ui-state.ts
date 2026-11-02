@@ -132,3 +132,13 @@ export function updateHistoryEditDraftStatus(
     notes: status === "ON" ? "" : draft.notes,
   };
 }
+
+export function toggleLocationIdInSelection(
+  selectedIds: string[],
+  locationId: string
+): string[] {
+  if (selectedIds.includes(locationId)) {
+    return selectedIds.filter((id) => id !== locationId);
+  }
+  return [...selectedIds, locationId];
+}

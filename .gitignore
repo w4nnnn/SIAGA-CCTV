@@ -5,3 +5,4 @@ dist/
 .env.local
 .superpowers/
 *.tsbuildinfo
+next-env.d.ts
