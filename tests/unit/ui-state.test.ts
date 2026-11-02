@@ -6,6 +6,7 @@ import {
   updateRowNotes,
   buildExportDownloadUrl,
   resolveInitialTheme,
+  getNavigationItemsForRole,
 } from "../../src/lib/ui-state";
 
 describe("ui-state helpers for batch form, theme, & export URLs", () => {
@@ -83,5 +84,18 @@ describe("ui-state helpers for batch form, theme, & export URLs", () => {
     expect(resolveInitialTheme("dark", false)).toBe("dark");
     expect(resolveInitialTheme(null, true)).toBe("dark");
     expect(resolveInitialTheme(null, false)).toBe("light");
+  });
+
+  it("menyediakan menu navigasi yang sesuai untuk role PETUGAS dan ADMIN", () => {
+    const petugasNav = getNavigationItemsForRole("PETUGAS");
+    expect(petugasNav.map((n) => n.href)).toEqual(["/petugas", "/petugas/riwayat"]);
+
+    const adminNav = getNavigationItemsForRole("ADMIN");
+    expect(adminNav.map((n) => n.href)).toEqual([
+      "/admin",
+      "/admin/rekap",
+      "/admin/master",
+      "/petugas",
+    ]);
   });
 });

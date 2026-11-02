@@ -94,3 +94,24 @@ export function resolveInitialTheme(
   }
   return prefersDark ? "dark" : "light";
 }
+
+export interface NavItem {
+  href: string;
+  label: string;
+  iconName: "dashboard" | "rekap" | "master" | "input" | "riwayat";
+}
+
+export function getNavigationItemsForRole(role: "ADMIN" | "PETUGAS"): NavItem[] {
+  if (role === "ADMIN") {
+    return [
+      { href: "/admin", label: "Dashboard Harian", iconName: "dashboard" },
+      { href: "/admin/rekap", label: "Rekap & Export", iconName: "rekap" },
+      { href: "/admin/master", label: "Master Lokasi & User", iconName: "master" },
+      { href: "/petugas", label: "Input Laporan", iconName: "input" },
+    ];
+  }
+  return [
+    { href: "/petugas", label: "Input Harian", iconName: "input" },
+    { href: "/petugas/riwayat", label: "Riwayat & Edit", iconName: "riwayat" },
+  ];
+}
