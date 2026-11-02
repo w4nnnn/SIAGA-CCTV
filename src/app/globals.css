@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #0F172A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #E2E8F0;
+  --color-on-secondary: #0F172A;
+  --color-accent: #16A34A;
+  --color-on-accent: #FFFFFF;
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #475569;
+  --color-border: #CBD5E1;
+  --color-destructive: #DC2626;
+  --color-on-destructive: #FFFFFF;
+  --color-ring: #0F172A;
+}
+
+.dark {
+  --color-primary: #1E293B;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #334155;
+  --color-on-secondary: #FFFFFF;
+  --color-accent: #22C55E;
+  --color-on-accent: #0F172A;
+  --color-background: #0F172A;
+  --color-foreground: #F8FAFC;
+  --color-card: #1B2336;
+  --color-card-foreground: #F8FAFC;
+  --color-muted: #272F42;
+  --color-muted-foreground: #94A3B8;
+  --color-border: #475569;
+  --color-destructive: #EF4444;
+  --color-on-destructive: #000000;
+  --color-ring: #FFFFFF;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: "Fira Sans", system-ui, -apple-system, sans-serif;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: "Fira Code", ui-monospace, SFMono-Regular, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
