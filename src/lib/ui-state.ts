@@ -115,3 +115,20 @@ export function getNavigationItemsForRole(role: "ADMIN" | "PETUGAS"): NavItem[] 
     { href: "/petugas/riwayat", label: "Riwayat & Edit", iconName: "riwayat" },
   ];
 }
+
+export interface HistoryEditDraft {
+  reportId: string;
+  status: "ON" | "OFF";
+  notes: string;
+}
+
+export function updateHistoryEditDraftStatus(
+  draft: HistoryEditDraft,
+  status: "ON" | "OFF"
+): HistoryEditDraft {
+  return {
+    ...draft,
+    status,
+    notes: status === "ON" ? "" : draft.notes,
+  };
+}

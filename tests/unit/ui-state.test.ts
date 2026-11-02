@@ -7,6 +7,7 @@ import {
   buildExportDownloadUrl,
   resolveInitialTheme,
   getNavigationItemsForRole,
+  updateHistoryEditDraftStatus,
 } from "../../src/lib/ui-state";
 
 describe("ui-state helpers for batch form, theme, & export URLs", () => {
@@ -97,5 +98,16 @@ describe("ui-state helpers for batch form, theme, & export URLs", () => {
       "/admin/master",
       "/petugas",
     ]);
+  });
+
+  it("mereset catatan menjadi kosong saat draft edit riwayat diubah dari OFF ke ON", () => {
+    const draft = {
+      reportId: "rep-1",
+      status: "OFF" as const,
+      notes: "Kamera gerbang mati",
+    };
+    const nextDraft = updateHistoryEditDraftStatus(draft, "ON");
+    expect(nextDraft.status).toBe("ON");
+    expect(nextDraft.notes).toBe("");
   });
 });
