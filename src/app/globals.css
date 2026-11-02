@@ -1,6 +1,31 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #0F172A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #475569;
+  --accent: #16A34A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #E2E8F0;
+  --input: #CBD5E1;
+  --ring: #16A34A;
+  --radius: 0.625rem;
+
   --color-primary: #0F172A;
   --color-on-primary: #FFFFFF;
   --color-secondary: #E2E8F0;
@@ -13,13 +38,33 @@
   --color-card-foreground: #0F172A;
   --color-muted: #F1F5F9;
   --color-muted-foreground: #475569;
-  --color-border: #CBD5E1;
+  --color-border: #E2E8F0;
   --color-destructive: #DC2626;
   --color-on-destructive: #FFFFFF;
-  --color-ring: #0F172A;
+  --color-ring: #16A34A;
 }
 
 .dark {
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  --card: #1B2336;
+  --card-foreground: #F8FAFC;
+  --popover: #1B2336;
+  --popover-foreground: #F8FAFC;
+  --primary: #22C55E;
+  --primary-foreground: #0F172A;
+  --secondary: #334155;
+  --secondary-foreground: #F8FAFC;
+  --muted: #272F42;
+  --muted-foreground: #94A3B8;
+  --accent: #22C55E;
+  --accent-foreground: #0F172A;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #334155;
+  --input: #475569;
+  --ring: #22C55E;
+
   --color-primary: #1E293B;
   --color-on-primary: #FFFFFF;
   --color-secondary: #334155;
@@ -32,15 +77,15 @@
   --color-card-foreground: #F8FAFC;
   --color-muted: #272F42;
   --color-muted-foreground: #94A3B8;
-  --color-border: #475569;
+  --color-border: #334155;
   --color-destructive: #EF4444;
   --color-on-destructive: #000000;
-  --color-ring: #FFFFFF;
+  --color-ring: #22C55E;
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: "Fira Sans", system-ui, -apple-system, sans-serif;
   transition: background-color 200ms ease, color 200ms ease;
 }
@@ -59,5 +104,42 @@ pre,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

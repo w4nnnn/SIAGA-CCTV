@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { resolveInitialTheme } from "@/lib/ui-state";
 
 const THEME_STORAGE_KEY = "siaga-cctv-theme";
@@ -27,14 +28,15 @@ export function ThemeToggle() {
   };
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
       onClick={toggleTheme}
       aria-label={
         theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"
       }
       title={theme === "dark" ? "Mode Terang" : "Mode Gelap"}
-      className="inline-flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2 text-sm font-medium text-[var(--color-foreground)] transition-colors duration-200 hover:bg-[var(--color-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      className="min-h-[44px] min-w-[44px] cursor-pointer gap-2"
     >
       {theme === "dark" ? (
         <>
@@ -47,6 +49,6 @@ export function ThemeToggle() {
           <span className="hidden sm:inline">Gelap</span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
