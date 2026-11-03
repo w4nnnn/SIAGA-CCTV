@@ -3,10 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, type SessionUser } from "@/lib/auth";
 import { getTodayDateInJakarta } from "@/lib/ui-state";
 import { DailyMonitoringBoard } from "@/components/admin/DailyMonitoringBoard";
-import {
-  formatWhatsAppDailyReport,
-  getDailyMonitoringSummary,
-} from "@/server/services/recap.service";
+import { getDailyMonitoringSummary } from "@/server/services/recap.service";
 
 export default async function AdminDashboardPage({
   searchParams,
@@ -30,15 +27,10 @@ export default async function AdminDashboardPage({
       : todayStr;
 
   const summary = await getDailyMonitoringSummary(reportDate);
-  const whatsAppText = formatWhatsAppDailyReport(summary);
 
   return (
     <div className="mx-auto max-w-7xl">
-      <DailyMonitoringBoard
-        key={reportDate}
-        summary={summary}
-        whatsAppText={whatsAppText}
-      />
+      <DailyMonitoringBoard key={reportDate} summary={summary} />
     </div>
   );
 }

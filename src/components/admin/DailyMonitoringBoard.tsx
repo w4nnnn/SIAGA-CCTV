@@ -6,11 +6,9 @@ import {
   AlertTriangle,
   Building2,
   Calendar,
-  Check,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
-  Copy,
   PieChart,
   Search,
   Video,
@@ -36,18 +34,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CategoryBadge, StatusBadge } from "@/components/common/StatusBadge";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export function DailyMonitoringBoard({
   summary,
-  whatsAppText,
 }: {
   summary: DailyMonitoringSummary;
-  whatsAppText: string;
 }) {
   const router = useRouter();
-  const [copied, setCopied] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -84,17 +78,6 @@ export function DailyMonitoringBoard({
 
   const goToDate = (nextDate: string) => {
     router.push(`/admin?date=${encodeURIComponent(nextDate)}`);
-  };
-
-  const handleCopyWhatsApp = async () => {
-    try {
-      await navigator.clipboard.writeText(whatsAppText);
-      setCopied(true);
-      toast.success("Format WhatsApp berhasil disalin ke clipboard!");
-      setTimeout(() => setCopied(false), 2200);
-    } catch {
-      toast.error("Gagal menyalin format WhatsApp ke clipboard.");
-    }
   };
 
   return (
@@ -160,63 +143,28 @@ export function DailyMonitoringBoard({
             </Button>
           )}
 
-          <Button
-            type="button"
-            onClick={handleCopyWhatsApp}
-            className="h-8 cursor-pointer gap-2 rounded-[0.25rem] bg-primary font-heading text-xs font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            {copied ? (
-              <>
-                <Check className="size-3.5" />
-                <span>Format WA Tersalin!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="size-3.5" />
-                <span>Salin Format WhatsApp</span>
-              </>
-            )}
-          </Button>
+          {/* Segmented Category Filter Pills */}
+          <div className="inline-flex items-center gap-1 rounded-[0.25rem] border border-border bg-muted/40 p-0.5 shadow-xs">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={cn(
+                    "rounded-[0.2rem] px-2.5 py-1 text-xs font-heading font-semibold transition-all cursor-pointer",
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  )}
+                >
+                  {cat === "ALL" ? "Semua" : cat}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-
-      {/* Category Filter Pills */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border pb-3">
-        <span className="mr-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Filter Wilayah:
-        </span>
-        {categories.map((cat) => {
-          const isSelected = selectedCategory === cat;
-          const count =
-            cat === "ALL"
-              ? summary.items.length
-              : summary.items.filter((i) => i.category === cat).length;
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-[0.25rem] border px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer",
-                isSelected
-                  ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                  : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <span>{cat === "ALL" ? "Semua Kategori" : cat}</span>
-              <span
-                className={cn(
-                  "rounded-full px-1.5 text-[10px] font-mono",
-                  isSelected
-                    ? "bg-primary-foreground/20 text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {count}
-              </span>
-            </button>
-          );
-        })}
       </div>
 
       {/* KPI 4-Card Summary Grid (Border Accent Atas) */}
