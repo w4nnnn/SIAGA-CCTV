@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { logoutAction } from "@/server/actions/auth.actions";
 
 export function LogoutConfirmButton({
   className,
@@ -21,10 +22,18 @@ export function LogoutConfirmButton({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
 
   const handleLogout = () => {
-    toast.info("Mengakhiri sesi login...");
-    window.location.href = "/api/auth/signout";
+    toast.info("Mengakhiri sesi dan keluar...");
+    startTransition(async () => {
+      try {
+        await logoutAction();
+      } catch {
+        // Fallback jika redirect NextAuth
+        window.location.href = "/login";
+      }
+    });
   };
 
   return (
@@ -47,18 +56,29 @@ export function LogoutConfirmButton({
             Konfirmasi Keluar Sistem
           </AlertDialogTitle>
           <AlertDialogDescription className="text-xs text-muted-foreground">
-            Apakah Anda yakin ingin mengakhiri sesi dan keluar dari sistem SIAGA-CCTV? Anda perlu login kembali untuk mengakses laporan.
+            Apakah Anda yakin ingin mengakhiri sesi dan keluar dari sistem SIAGA-CCTV? Anda akan diarahkan langsung ke halaman login.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-4 gap-2">
-          <AlertDialogCancel className="cursor-pointer rounded-[0.25rem] text-xs font-heading font-semibold">
+          <AlertDialogCancel
+            disabled={isPending}
+            className="cursor-pointer rounded-[0.25rem] text-xs font-heading font-semibold"
+          >
             Batal
           </AlertDialogCancel>
           <AlertDialogAction
+            disabled={isPending}
             onClick={handleLogout}
-            className="cursor-pointer rounded-[0.25rem] bg-destructive text-xs font-heading font-bold text-destructive-foreground hover:bg-destructive/90"
+            className="cursor-pointer gap-2 rounded-[0.25rem] bg-destructive text-xs font-heading font-bold text-destructive-foreground hover:bg-destructive/90"
           >
-            Ya, Keluar
+            {isPending ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                <span>Keluar...</span>
+              </>
+            ) : (
+              <span>Ya, Keluar</span>
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
