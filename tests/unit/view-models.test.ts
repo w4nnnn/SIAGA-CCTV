@@ -5,7 +5,9 @@ import {
   computeDistribution,
   computeRecapKpis,
   filterDashboardItems,
+  getLastDayOfMonth,
   getRangePreset,
+  detectActivePreset,
   paginate,
   percentOf,
   shiftDate,
@@ -84,11 +86,29 @@ describe("view-models: tanggal, filter, pagination", () => {
     expect(shiftDate("2026-12-31", 1)).toBe("2027-01-01");
   });
 
-  it("getRangePreset: hari ini, minggu ini (mulai Senin), bulan ini", () => {
-    expect(getRangePreset("today", "2026-11-04")).toEqual({ startDate: "2026-11-04", endDate: "2026-11-04" });
+  it("getLastDayOfMonth menghitung hari terakhir bulan dengan benar", () => {
+    expect(getLastDayOfMonth("2026-11-04")).toBe("2026-11-30");
+    expect(getLastDayOfMonth("2026-10-15")).toBe("2026-10-31");
+    expect(getLastDayOfMonth("2024-02-10")).toBe("2024-02-29"); // kabisat
+    expect(getLastDayOfMonth("2025-02-10")).toBe("2025-02-28"); // non-kabisat
+  });
+
+  it("getRangePreset: hari ini, 7 hari terakhir, 30 hari terakhir, bulan ini kalender penuh", () => {
+    expect(getRangePreset("today", "2026-11-03")).toEqual({ startDate: "2026-11-03", endDate: "2026-11-03" });
+    expect(getRangePreset("7d", "2026-11-03")).toEqual({ startDate: "2026-10-28", endDate: "2026-11-03" });
+    expect(getRangePreset("30d", "2026-11-03")).toEqual({ startDate: "2026-10-05", endDate: "2026-11-03" });
+    expect(getRangePreset("month", "2026-11-03")).toEqual({ startDate: "2026-11-01", endDate: "2026-11-30" });
+    // backward compatibility untuk week
     expect(getRangePreset("week", "2026-11-04")).toEqual({ startDate: "2026-11-02", endDate: "2026-11-04" });
-    expect(getRangePreset("week", "2026-11-08")).toEqual({ startDate: "2026-11-02", endDate: "2026-11-08" });
-    expect(getRangePreset("month", "2026-11-04")).toEqual({ startDate: "2026-11-01", endDate: "2026-11-04" });
+  });
+
+  it("detectActivePreset mendeteksi preset aktif secara tepat", () => {
+    const today = "2026-11-03";
+    expect(detectActivePreset("2026-11-03", "2026-11-03", today)).toBe("today");
+    expect(detectActivePreset("2026-10-28", "2026-11-03", today)).toBe("7d");
+    expect(detectActivePreset("2026-10-05", "2026-11-03", today)).toBe("30d");
+    expect(detectActivePreset("2026-11-01", "2026-11-30", today)).toBe("month");
+    expect(detectActivePreset("2026-10-10", "2026-10-20", today)).toBe("custom");
   });
 
   it("filterDashboardItems memfilter kategori dan kata kunci (case-insensitive)", () => {

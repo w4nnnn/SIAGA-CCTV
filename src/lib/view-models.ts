@@ -104,18 +104,57 @@ export function shiftDate(dateStr: string, days: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
+export function getLastDayOfMonth(dateStr: string): string {
+  const [y, m] = dateStr.split("-").map(Number);
+  const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const mm = String(m).padStart(2, "0");
+  const dd = String(lastDay).padStart(2, "0");
+  return `${y}-${mm}-${dd}`;
+}
+
+export type RangePresetType = "today" | "7d" | "30d" | "month" | "week";
+
 export function getRangePreset(
-  preset: "today" | "week" | "month",
+  preset: RangePresetType,
   today: string
 ): { startDate: string; endDate: string } {
   if (preset === "today") return { startDate: today, endDate: today };
+  if (preset === "7d") {
+    return { startDate: shiftDate(today, -6), endDate: today };
+  }
+  if (preset === "30d") {
+    return { startDate: shiftDate(today, -29), endDate: today };
+  }
   if (preset === "month") {
-    return { startDate: `${today.slice(0, 7)}-01`, endDate: today };
+    return { startDate: `${today.slice(0, 7)}-01`, endDate: getLastDayOfMonth(today) };
   }
   const [y, m, d] = today.split("-").map(Number);
   const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
   const sinceMonday = (weekday + 6) % 7;
   return { startDate: shiftDate(today, -sinceMonday), endDate: today };
+}
+
+export function detectActivePreset(
+  startDate: string,
+  endDate: string,
+  today: string
+): "today" | "7d" | "30d" | "month" | "custom" {
+  if (startDate === today && endDate === today) {
+    return "today";
+  }
+  if (startDate === shiftDate(today, -6) && endDate === today) {
+    return "7d";
+  }
+  if (startDate === shiftDate(today, -29) && endDate === today) {
+    return "30d";
+  }
+  if (
+    startDate === `${today.slice(0, 7)}-01` &&
+    endDate === getLastDayOfMonth(today)
+  ) {
+    return "month";
+  }
+  return "custom";
 }
 
 export function filterDashboardItems<
