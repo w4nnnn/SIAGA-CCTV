@@ -7,7 +7,6 @@ import {
   Building2,
   CheckCircle2,
   KeyRound,
-  Layers,
   MapPin,
   Pencil,
   Plus,
@@ -344,7 +343,7 @@ export function MasterDataManager({
   return (
     <div className="space-y-6">
       {/* Header and Top Actions */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center rounded-[0.25rem] bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground tracking-wider uppercase">
@@ -359,7 +358,7 @@ export function MasterDataManager({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2.5">
           <Button
             type="button"
             variant="outline"
@@ -371,7 +370,7 @@ export function MasterDataManager({
             className="h-9 cursor-pointer gap-2 rounded-[0.25rem] border-border font-heading text-xs font-semibold hover:bg-muted"
           >
             <UserPlus className="size-4" />
-            <span>+ Tambah Pengguna</span>
+            <span>Tambah Pengguna</span>
           </Button>
 
           <Button
@@ -384,7 +383,7 @@ export function MasterDataManager({
             className="h-9 cursor-pointer gap-2 rounded-[0.25rem] bg-primary font-heading text-xs font-bold text-primary-foreground hover:bg-primary/90 shadow-sm"
           >
             <Plus className="size-4" />
-            <span>+ Tambah Lokasi Baru</span>
+            <span>Tambah Lokasi Baru</span>
           </Button>
         </div>
       </div>
@@ -462,21 +461,6 @@ export function MasterDataManager({
           </div>
         </Card>
       </section>
-
-      {/* System Notice Box */}
-      <div className="flex items-start gap-3 rounded-[0.5rem] border border-border bg-card p-4 text-xs shadow-xs">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
-          <Layers className="size-4" />
-        </div>
-        <div className="space-y-0.5">
-          <span className="font-heading font-bold text-foreground">
-            Arsitektur Many-to-Many &amp; Urutan Pelaporan:
-          </span>
-          <p className="text-muted-foreground">
-            Satu akun petugas dapat mengelola beberapa terminal sekaligus (multi-lokasi). Nomor urut menentukan posisi kemunculan titik pada ringkasan harian WhatsApp, tabel pemantauan, dan ekspor resmi Excel/PDF.
-          </p>
-        </div>
-      </div>
 
       {/* Feedback Banner */}
       {feedback && (
