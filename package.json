@@ -15,7 +15,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file=.env src/db/seed.ts",
-    "db:seed:simulasi": "tsx --env-file=.env src/db/seed-simulation.ts"
+    "db:seed:simulasi": "tsx --env-file=.env src/db/seed-simulation.ts",
+    "docker:build": "docker build -t siaga-cctv:latest .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "keywords": [],
   "dependencies": {
