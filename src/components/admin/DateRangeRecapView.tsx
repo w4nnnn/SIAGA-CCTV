@@ -20,6 +20,7 @@ import {
   buildActivityMatrix,
   buildAuditRows,
   computeRecapKpis,
+  detectActivePreset,
   getRangePreset,
 } from "@/lib/view-models";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,6 +65,11 @@ export function DateRangeRecapView({
 
   const todayStr = useMemo(() => getTodayDateInJakarta(), []);
 
+  const activePreset = useMemo(
+    () => detectActivePreset(startDate, endDate, todayStr),
+    [startDate, endDate, todayStr]
+  );
+
   // Hitung KPI, Matriks, dan Tabel Audit
   const kpis = useMemo(() => computeRecapKpis(recap), [recap]);
   const matrix = useMemo(() => buildActivityMatrix(recap), [recap]);
@@ -77,9 +83,9 @@ export function DateRangeRecapView({
   }, [locations]);
 
   const statusOptions = [
-    { value: "ALL", label: "Semua Status (Normal, Kendala, Pending)" },
+    { value: "ALL", label: "Semua Status" },
     { value: "ON", label: "Hanya Status ON" },
-    { value: "OFF", label: "Hanya Ada Kendala / OFF" },
+    { value: "OFF", label: "Hanya Kendala / OFF" },
     { value: "UNREPORTED", label: "Hanya Belum Lapor" },
   ];
 
@@ -93,7 +99,7 @@ export function DateRangeRecapView({
     router.push(`/admin/rekap?${params.toString()}`);
   };
 
-  const handlePreset = (preset: "today" | "week" | "month") => {
+  const handlePreset = (preset: "today" | "7d" | "month" | "30d") => {
     const range = getRangePreset(preset, todayStr);
     setStartDate(range.startDate);
     setEndDate(range.endDate);
@@ -166,39 +172,52 @@ export function DateRangeRecapView({
               <span className="mr-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Preset Rentang:
               </span>
-              <button
-                type="button"
-                onClick={() => handlePreset("today")}
-                className="rounded-[0.25rem] border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
-              >
-                Hari Ini
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePreset("week")}
-                className="rounded-[0.25rem] border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
-              >
-                Minggu Ini
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePreset("month")}
-                className="rounded-[0.25rem] border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-xs cursor-pointer"
-              >
-                Bulan Ini
-              </button>
+              {[
+                { id: "today" as const, label: "Hari Ini" },
+                { id: "7d" as const, label: "7 Hari Terakhir" },
+                { id: "month" as const, label: "Bulan Ini" },
+                { id: "30d" as const, label: "30 Hari Terakhir" },
+              ].map((p) => {
+                const isActive = activePreset === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handlePreset(p.id)}
+                    className={cn(
+                      "rounded-[0.25rem] border px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer",
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground shadow-xs font-bold"
+                        : "border-border bg-muted/40 text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {activePreset === "custom" && (
+                <span className="rounded-[0.25rem] border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  Rentang Kustom
+                </span>
+              )}
               <span className="size-2 rounded-full bg-[var(--color-status-on-solid)]" />
               <span>Database Terkoneksi: Log Shift Terverifikasi</span>
             </div>
           </div>
 
           {/* Filter Form Controls */}
-          <form onSubmit={handleApplyFilter} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="filter-start-date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <form
+            onSubmit={handleApplyFilter}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12"
+          >
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-2">
+              <Label
+                htmlFor="filter-start-date"
+                className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Periode Mulai
               </Label>
               <Input
@@ -206,12 +225,15 @@ export function DateRangeRecapView({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="h-9 rounded-[0.25rem] font-mono text-xs"
+                className="h-9 w-full rounded-[0.25rem] font-mono text-xs"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="filter-end-date" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-2">
+              <Label
+                htmlFor="filter-end-date"
+                className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 Periode Sampai
               </Label>
               <Input
@@ -219,12 +241,12 @@ export function DateRangeRecapView({
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="h-9 rounded-[0.25rem] font-mono text-xs"
+                className="h-9 w-full rounded-[0.25rem] font-mono text-xs"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-3">
+              <Label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Lokasi Operasional
               </Label>
               <SimpleSelect
@@ -235,8 +257,8 @@ export function DateRangeRecapView({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-3">
+              <Label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Status Filter
               </Label>
               <SimpleSelect
@@ -249,7 +271,10 @@ export function DateRangeRecapView({
               />
             </div>
 
-            <div className="flex items-end">
+            <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
+              <Label className="block text-xs font-semibold uppercase tracking-wider text-transparent select-none">
+                Aksi
+              </Label>
               <Button
                 type="submit"
                 className="h-9 w-full cursor-pointer gap-2 rounded-[0.25rem] bg-primary font-heading text-xs font-bold text-primary-foreground hover:bg-primary/90"

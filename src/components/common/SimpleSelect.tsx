@@ -22,6 +22,7 @@ interface SimpleSelectProps {
   options: SelectOption[];
   placeholder?: string;
   className?: string;
+  size?: "sm" | "default" | "md";
   disabled?: boolean;
 }
 
@@ -32,12 +33,15 @@ export function SimpleSelect({
   options,
   placeholder = "Pilih...",
   className,
+  size,
   disabled,
 }: SimpleSelectProps) {
   const items = React.useMemo(
     () => options.map((opt) => ({ value: opt.value, label: opt.label })),
     [options]
   );
+
+  const resolvedSize = size ?? (className?.includes("h-9") ? "md" : "default");
 
   return (
     <Select
@@ -48,7 +52,11 @@ export function SimpleSelect({
       }}
       disabled={disabled}
     >
-      <SelectTrigger id={id} className={cn("w-full justify-between", className)}>
+      <SelectTrigger
+        id={id}
+        size={resolvedSize}
+        className={cn("w-full justify-between", className)}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent align="start" className="min-w-[180px]">
