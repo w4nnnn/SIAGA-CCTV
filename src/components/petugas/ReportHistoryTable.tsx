@@ -18,7 +18,6 @@ import {
   Loader2,
   RotateCcw,
   Save,
-  ShieldCheck,
   User,
   Video,
 } from "lucide-react";
@@ -512,21 +511,6 @@ export function ReportHistoryTable({
           </Card>
         </div>
       )}
-
-      {/* Audit Trail Disclaimer Banner */}
-      <div className="flex items-start gap-3 rounded-[0.5rem] border border-border bg-card p-4 text-xs shadow-xs">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
-          <ShieldCheck className="size-4" />
-        </div>
-        <div className="space-y-0.5">
-          <span className="font-heading font-bold text-foreground">
-            Integritas Audit Laporan Harian SIAGA-CCTV:
-          </span>
-          <p className="text-muted-foreground">
-            Seluruh riwayat revisi dan perubahan status CCTV tercatat secara transparan dengan identitas petugas pembaru. Data laporan ini digunakan sebagai acuan rekonsiliasi keandalan surveillance Pertamina regional.
-          </p>
-        </div>
-      </div>
 
       {/* Edit Dialog Modal (Koreksi Data) */}
       <Dialog
