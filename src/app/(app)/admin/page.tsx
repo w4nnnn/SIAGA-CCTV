@@ -1,8 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { auth, SessionUser } from "@/lib/auth";
+import { auth, type SessionUser } from "@/lib/auth";
 import { getTodayDateInJakarta } from "@/lib/ui-state";
-import { AppNavbar } from "@/components/layout/AppNavbar";
 import { DailyMonitoringBoard } from "@/components/admin/DailyMonitoringBoard";
 import {
   formatWhatsAppDailyReport,
@@ -34,25 +33,12 @@ export default async function AdminDashboardPage({
   const whatsAppText = formatWhatsAppDailyReport(summary);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <AppNavbar user={user} />
-
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-        <div className="mb-6">
-          <h1 className="font-mono text-2xl font-bold text-[var(--color-foreground)]">
-            Dashboard Pemantauan Harian CCTV
-          </h1>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-            Pantau status pelaporan seluruh lokasi secara real-time dan salin rekap format WhatsApp.
-          </p>
-        </div>
-
-        <DailyMonitoringBoard
-          key={reportDate}
-          summary={summary}
-          whatsAppText={whatsAppText}
-        />
-      </main>
+    <div className="mx-auto max-w-7xl">
+      <DailyMonitoringBoard
+        key={reportDate}
+        summary={summary}
+        whatsAppText={whatsAppText}
+      />
     </div>
   );
 }

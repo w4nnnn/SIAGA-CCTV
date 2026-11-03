@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-tertiary-fixed-variant":"#264191","surface-tint":"#3a5f94","secondary":"#565e74","primary":"#001e40","text-muted":"#64748B","primary-fixed-dim":"#a7c8ff","on-primary-fixed":"#001b3c","on-surface-variant":"#43474f","error":"#ba1a1a","outline-variant":"#c3c6d1","secondary-fixed":"#dae2fd","surface-container-low":"#eff4ff","status-warning-base":"#D97706","inverse-primary":"#a7c8ff","on-error":"#ffffff","on-primary":"#ffffff","surface-container-high":"#dce9ff","on-tertiary-fixed":"#00164e","on-secondary-container":"#5c647a","surface-dim":"#cbdbf5","surface-container-highest":"#d3e4fe","surface":"#f8f9ff","status-warning-surface":"#FFFBEB","secondary-fixed-dim":"#bec6e0","error-container":"#ffdad6","surface-variant":"#d3e4fe","on-error-container":"#93000a","status-pending-base":"#64748B","text-main":"#0F172A","surface-bright":"#f8f9ff","status-on-surface":"#F0FDF4","on-tertiary":"#ffffff","on-secondary-fixed-variant":"#3f465c","inverse-on-surface":"#eaf1ff","status-off-base":"#DC2626","secondary-container":"#dae2fd","on-tertiary-container":"#8098ed","status-warning-border":"#FDE68A","background":"#f8f9ff","on-secondary":"#ffffff","surface-card":"#FFFFFF","tertiary":"#001855","status-pending-border":"#CBD5E1","primary-fixed":"#d5e3ff","on-background":"#0b1c30","on-primary-fixed-variant":"#1f477b","status-on-border":"#86EFAC","tertiary-container":"#0b2c7d","tertiary-fixed":"#dce1ff","primary-container":"#003366","status-on-base":"#16A34A","surface-container":"#e5eeff","border-grid":"#E2E8F0","outline":"#737780","inverse-surface":"#213145","on-primary-container":"#799dd6","on-surface":"#0b1c30","surface-container-lowest":"#ffffff","tertiary-fixed-dim":"#b6c4ff","canvas-subtle":"#F1F5F9","status-off-border":"#FCA5A5","status-off-surface":"#FEF2F2","status-pending-surface":"#F8FAFC","canvas-base":"#F8FAFC","on-secondary-fixed":"#131b2e"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-desktop":"2rem","space-2xl":"3rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","gutter":"1rem","space-md":"1rem","margin":"1rem","space-xs":"0.25rem","gutter-desktop":"1.5rem"},fontFamily:{"headline-md":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"],"body-lg":["Inter"],"headline-xl":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-sm":["Plus Jakarta Sans"],"caption":["Inter"],"headline-lg":["Plus Jakarta Sans"],"label-md":["Inter"],"label-sm":["Inter"],"data-mono":["Inter"]},fontSize:{"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"headline-xl-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"headline-xl":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["13px",{lineHeight:"18px",fontWeight:"400"}],"headline-sm":["16px",{lineHeight:"24px",fontWeight:"600"}],"caption":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"500"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"600"}],"label-md":["14px",{lineHeight:"20px",fontWeight:"500"}],"label-sm":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"data-mono":["13px",{lineHeight:"18px",fontWeight:"500"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-lowest"><img alt="SIAGA-CCTV Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V0ZUk6AbyefqPQX8o6Josqh1yb0AsiJkjIpkxK2_eF9JdOMiK7xgc-GA5WeheC7jiPPkJ2gYoyLdnEO_BY7rm4IIP0z-r_0q-FbOTImzWIERUFL6CRdmcw3kV7SHY-bnstzsJblcczd1bgRiESSDYwJcuT8Szn5jPlL_OMZtRrw_PjlcsPS3hOL_dRKEiwb-hYsaNOIekGZ51ZHyWbTfGa3Rcfsu4VtZcHnauzv3-wWQ"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">SIAGA-CCTV</span><span class="font-caption text-caption text-text-muted uppercase tracking-wider">Operational Surveillance</span></div></div><div class="px-space-md py-space-sm"><div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-low text-text-muted"><span class="material-symbols-outlined text-sm">calendar_today</span><span class="font-caption text-caption">Senin, 02 Nov 2026</span></div></div><nav class="flex flex-col gap-space-xs px-space-sm mt-space-xs" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="dashboard-harian" href="#"><span class="material-symbols-outlined text-lg">monitoring</span><span class="font-label-md text-label-md">Dashboard Harian</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="input-laporan" href="#"><span class="material-symbols-outlined text-lg">playlist_add_check</span><span class="font-label-md text-label-md">Input Laporan</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="riwayat-dan-edit" href="#"><span class="material-symbols-outlined text-lg">history</span><span class="font-label-md text-label-md">Riwayat &amp; Edit</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="rekap-dan-export" href="#"><span class="material-symbols-outlined text-lg">file_download</span><span class="font-label-md text-label-md">Rekap &amp; Export</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="master-data" href="#"><span class="material-symbols-outlined text-lg">settings_suggest</span><span class="font-label-md text-label-md">Master Data</span></a></nav></div><div class="p-space-md flex flex-col gap-space-xs bg-surface-container-lowest"><div class="flex items-center justify-between text-text-muted px-space-xs"><span class="font-caption text-caption">Sistem Status</span><span class="flex items-center gap-1 font-caption text-caption text-status-on-base"><span class="w-2 h-2 rounded-full bg-status-on-base inline-block"></span> Normal</span></div><div class="font-caption text-caption text-text-muted px-space-xs">v2.4.0 Enterprise Telemetry</div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-card/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded text-primary"><span class="material-symbols-outlined text-base">event</span><span class="font-label-sm text-label-sm font-semibold">Senin, 02 November 2026</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1 text-text-muted"><span class="material-symbols-outlined text-base">schedule</span><span class="font-label-sm text-label-sm">Shift 1 (07:00 - 15:00 WIB)</span></div></div><div class="flex items-center gap-space-md"><button class="relative p-space-xs rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Notifikasi" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-status-off-base"></span></button><div class="h-6 w-px bg-border-grid"></div><div class="flex items-center gap-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5cmyspOxqbQMKep4mnrh550zUkqVTwVTvvpUIjeJqZjYWx5PeAnSVF1NTA39o3Y_OxEDeNKzBOZp8Tjwy69MfVdDKg7pSE2OBS9caZzMh6NEOaO_69e4DGIIFAVqpj3cVdqQuUUrBTb8XVx86apbUDtJ-sPUfQyUX2YNWlG0OwHz85SS_Nn31xRvoGehnibn19gATK1CazkLO8O1bvb1BA4Fc0SkBycQFeEwkf_mW"/><div class="flex flex-col text-left"><span class="font-label-md text-label-md text-text-main font-semibold leading-none">Budi Santoso</span><div class="flex items-center gap-1 mt-1"><span class="px-1.5 py-0.5 rounded font-caption text-caption bg-secondary-container text-on-secondary-container font-semibold">Supervisor / Admin</span></div></div></div><button class="flex items-center gap-1 p-space-xs ml-space-xs rounded text-text-muted hover:bg-error-container hover:text-on-error-container transition-colors" title="Keluar" type="button"><span class="material-symbols-outlined text-lg">logout</span></button></div></header><main class="w-full pt-16 bg-surface px-space-xl py-space-lg min-h-screen"><div class="flex flex-col w-full">
+<!-- Section 1: Page Header & Executive Context -->
+<div class="relative overflow-hidden rounded-xl bg-surface-card p-space-lg shadow-sm mb-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md relative z-10">
+<div class="flex flex-col gap-1 max-w-2xl">
+<div class="flex items-center gap-space-xs text-secondary mb-1">
+<span class="material-symbols-outlined text-sm text-surface-tint">folder_managed</span>
+<span class="font-caption text-caption tracking-wider uppercase font-semibold text-text-muted">Telemetri &amp; Audit Pengawasan Operasional</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">Rekapitulasi &amp; Export Laporan CCTV</h1>
+<p class="font-body-md text-body-md text-text-muted leading-relaxed">
+          Laporan agregat berkala, analisis kepatuhan pelaporan, dan ekspor dokumen resmi regional Jawa Bagian Timur.
+        </p>
+</div>
+<!-- Action Cluster: High-Visibility Official Export Triggers -->
+<div class="flex flex-wrap items-center gap-space-sm pt-space-xs lg:pt-0">
+<!-- Excel Button with Spec Tag -->
+<button class="group relative flex items-center gap-space-sm bg-status-on-base text-on-primary hover:opacity-95 active:scale-[0.98] transition-all px-space-md py-space-sm rounded-lg shadow-md cursor-pointer" id="btnExportExcel" onclick="triggerExportModal('excel')" type="button">
+<div class="p-1 rounded bg-surface-card/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">table_view</span>
+</div>
+<div class="flex flex-col text-left pr-1">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Export Excel (.xlsx)</span>
+<span class="material-symbols-outlined text-sm opacity-80 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</div>
+<span class="font-caption text-caption text-surface-container-high font-medium">Format exceljs: Auto-width, colored cells ON/OFF</span>
+</div>
+</button>
+<!-- PDF Button with Official SPV Tag -->
+<button class="group relative flex items-center gap-space-sm bg-error text-on-error hover:opacity-95 active:scale-[0.98] transition-all px-space-md py-space-sm rounded-lg shadow-md cursor-pointer" id="btnExportPDF" onclick="triggerExportModal('pdf')" type="button">
+<div class="p-1 rounded bg-surface-card/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">picture_as_pdf</span>
+</div>
+<div class="flex flex-col text-left pr-1">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold tracking-tight">Export PDF (.pdf)</span>
+<span class="material-symbols-outlined text-sm opacity-80 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</div>
+<span class="font-caption text-caption text-surface-container-high font-medium">Siap Cetak / Berita Acara Resmi SPV</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 2: Parameters & Filter Toolbar -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md mb-space-lg flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<!-- Preset Periode Segmented Buttons -->
+<div class="flex flex-col sm:flex-row sm:items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Preset Rentang:</span>
+<div class="inline-flex rounded-lg bg-surface-container-low p-1 gap-1" id="presetButtonGroup">
+<button class="px-space-sm py-1 rounded font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all" onclick="setPreset('today', this)" type="button">Hari Ini</button>
+<button class="px-space-sm py-1 rounded font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all" onclick="setPreset('week', this)" type="button">Minggu Ini</button>
+<button class="px-space-sm py-1 rounded font-label-sm text-label-sm bg-primary-container text-on-primary font-semibold shadow-xs" onclick="setPreset('month', this)" type="button">Bulan Ini (Aktif: Nov 2026)</button>
+<button class="px-space-sm py-1 rounded font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all" onclick="setPreset('custom', this)" type="button">Kustom Rentang</button>
+</div>
+</div>
+<!-- Live Sync Tag -->
+<div class="flex items-center gap-space-xs text-text-muted">
+<span class="material-symbols-outlined text-sm text-status-on-base">sync</span>
+<span class="font-caption text-caption">Database Terkoneksi: Mutasi Shift 1 &amp; Shift 2 Terverifikasi</span>
+</div>
+</div>
+<!-- Filter Input Cluster -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md pt-space-xs">
+<!-- Date Range Inputs -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted">Periode Mulai</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-lg pointer-events-none">calendar_month</span>
+<input class="w-full h-9 pl-9 pr-3 rounded bg-surface text-on-surface font-data-mono text-data-mono focus:outline-none cursor-default" readonly="" type="text" value="01 Nov 2026"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted">Periode Sampai</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-lg pointer-events-none">event_available</span>
+<input class="w-full h-9 pl-9 pr-3 rounded bg-surface text-on-surface font-data-mono text-data-mono focus:outline-none cursor-default" readonly="" type="text" value="30 Nov 2026"/>
+</div>
+</div>
+<!-- Kategori Dropdown Filter -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted" for="categoryFilter">Kategori Lokasi</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-lg pointer-events-none">domain</span>
+<select class="w-full h-9 pl-9 pr-8 rounded bg-surface text-on-surface font-body-md text-body-md focus:outline-none appearance-none cursor-pointer" id="categoryFilter" onchange="filterCategory(this.value)">
+<option value="ALL">Semua Kategori (IT, FT, AFT, LPG, BP)</option>
+<option value="IT">Integrated Terminal (IT)</option>
+<option value="FT">Fuel Terminal (FT)</option>
+<option value="AFT">Aviation Fuel Terminal (AFT)</option>
+<option value="LPG">Terminal LPG</option>
+<option value="BP">Bulk Plant / Depo Khusus (BP)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 text-secondary pointer-events-none text-base">expand_more</span>
+</div>
+</div>
+<!-- Status Dropdown Filter -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-text-muted" for="statusFilter">Status Filter</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-lg pointer-events-none">filter_alt</span>
+<select class="w-full h-9 pl-9 pr-8 rounded bg-surface text-on-surface font-body-md text-body-md focus:outline-none appearance-none cursor-pointer" id="statusFilter" onchange="filterStatus(this.value)">
+<option value="ALL">Semua Status (Normal &amp; Kendala)</option>
+<option value="OFF_ONLY">Ada Kendala / OFF Saja</option>
+<option value="ON_ONLY">Normal (100% ON)</option>
+<option value="PENDING">Ada Laporan Tertunda</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 text-secondary pointer-events-none text-base">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Kartu Analisis Agregat (KPI & Compliance Metrics) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-lg">
+<!-- Card 1: Kepatuhan Pelaporan -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Kepatuhan Lapor (Compliance)</span>
+<span class="font-headline-xl text-headline-xl text-text-main font-bold mt-1">96.8%</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-low text-primary-container">
+<span class="material-symbols-outlined text-2xl">verified_user</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-status-on-base h-full rounded-full transition-all duration-700" style="width: 96.8%"></div>
+</div>
+<div class="flex items-center justify-between mt-2 font-caption text-caption text-text-muted">
+<span>300 dari 310 laporan terjadwal shift</span>
+<span class="font-semibold text-status-on-base">+1.4% vs Okt 2026</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Hari Bebas Kendala -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Hari Bebas Kendala (All ON)</span>
+<span class="font-headline-xl text-headline-xl text-text-main font-bold mt-1">22 <span class="font-headline-md text-headline-md font-normal text-text-muted">Hari</span></span>
+</div>
+<div class="p-2.5 rounded-lg bg-status-on-surface text-status-on-base">
+<span class="material-symbols-outlined text-2xl">task_alt</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-status-on-base h-full rounded-full transition-all duration-700" style="width: 73.3%"></div>
+</div>
+<div class="flex items-center justify-between mt-2 font-caption text-caption text-text-muted">
+<span>Dari total 30 hari kalender</span>
+<span class="text-text-muted font-data-mono">Reliabilitas 73.3%</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Insiden Kendala Tercatat -->
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-muted uppercase tracking-wider">Insiden Kendala Tercatat</span>
+<span class="font-headline-xl text-headline-xl text-error font-bold mt-1">8 <span class="font-headline-md text-headline-md font-normal text-text-muted">Lokasi-Hari</span></span>
+</div>
+<div class="p-2.5 rounded-lg bg-status-off-surface text-status-off-base">
+<span class="material-symbols-outlined text-2xl">warning_amber</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-xs">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-status-off-base h-full rounded-full transition-all duration-700" style="width: 26.6%"></div>
+</div>
+<div class="flex items-center justify-between mt-2 font-caption text-caption text-text-muted">
+<span>Rata-rata durasi perbaikan: 4.2 jam</span>
+<span class="px-1.5 py-0.5 rounded bg-status-off-surface text-status-off-base font-semibold">Tindak Lanjut</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 4: Matriks Kalender / Grid Rekapitulasi Lokasi x Tanggal -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md mb-space-lg flex flex-col">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-primary-container"></div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Matriks Keaktifan: 01 s/d 07 November 2026</h2>
+<span class="font-caption text-caption text-text-muted">Inspeksi visual silang harian 10 lokasi terdistribusi (Shift 1 &amp; Shift 2 gabungan)</span>
+</div>
+</div>
+<!-- Visual Legend -->
+<div class="flex flex-wrap items-center gap-space-md text-xs font-medium">
+<div class="flex items-center gap-1.5">
+<span class="w-4 h-4 rounded bg-status-on-base text-white text-[10px] flex items-center justify-center font-bold">ON</span>
+<span class="text-text-muted font-label-sm text-label-sm">Normal (100% Online)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-4 h-4 rounded bg-status-off-base text-white text-[10px] flex items-center justify-center font-bold">OFF</span>
+<span class="text-text-muted font-label-sm text-label-sm">Ada Kendala / Sebagian OFF</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-4 h-4 rounded bg-surface-container-high text-secondary text-[10px] flex items-center justify-center font-bold">-</span>
+<span class="text-text-muted font-label-sm text-label-sm">Belum Pelaporan</span>
+</div>
+</div>
+</div>
+<!-- Matrix Scroll Wrapper -->
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant">
+<th class="py-2.5 px-3 font-label-sm text-label-sm uppercase rounded-l">Lokasi Operasional</th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center">Tipe</th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">01 Nov<br/><span class="text-[10px] font-normal">Min</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">02 Nov<br/><span class="text-[10px] font-normal">Sen</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">03 Nov<br/><span class="text-[10px] font-normal">Sel</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">04 Nov<br/><span class="text-[10px] font-normal">Rab</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">05 Nov<br/><span class="text-[10px] font-normal">Kam</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">06 Nov<br/><span class="text-[10px] font-normal">Jum</span></th>
+<th class="py-2.5 px-2 font-label-sm text-label-sm uppercase text-center w-14">07 Nov<br/><span class="text-[10px] font-normal">Sab</span></th>
+<th class="py-2.5 px-3 font-label-sm text-label-sm uppercase text-right rounded-r">Reliabilitas (7 Hari)</th>
+</tr>
+</thead>
+<tbody class="divide-y-0" id="matrixTableBody">
+<!-- Row 1: AFT Juanda -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">AFT Juanda</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">AFT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="01 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="02 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="03 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="04 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="05 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="06 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="07 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 2: IT Surabaya -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-off-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">IT Surabaya</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">IT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="01 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="02 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center">
+<span class="inline-flex w-7 h-7 rounded bg-status-off-base text-white text-xs items-center justify-center font-bold cursor-help ring-2 ring-error-container" title="03 Nov: OFF 2 titik kamera Gate Barat akibat switch restart">OFF</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="04 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="05 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="06 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold" title="07 Nov: Normal">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-text-main">85.7%</td>
+</tr>
+<!-- Row 3: IT Bima -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">IT Bima</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">IT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 4: LPG Surabaya -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-off-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">LPG Surabaya</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">LPG</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center">
+<span class="inline-flex w-7 h-7 rounded bg-status-off-base text-white text-xs items-center justify-center font-bold cursor-help" title="02 Nov: OFF 1 titik Dermaga 2 Jetty (kabel FO terkena maintenance)">OFF</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-text-main">85.7%</td>
+</tr>
+<!-- Row 5: BP Gresik -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">BP Gresik</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">BP</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 6: FT Malang -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">FT Malang</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 7: FT Madiun -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-off-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">FT Madiun</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center">
+<span class="inline-flex w-7 h-7 rounded bg-status-off-base text-white text-xs items-center justify-center font-bold cursor-help" title="05 Nov: OFF 1 titik Tangki 04 (konektor RJ45 korosi cuaca)">OFF</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-text-main">85.7%</td>
+</tr>
+<!-- Row 8: FT Tuban -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">FT Tuban</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 9: FT Camplong -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-on-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">FT Camplong</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-status-on-base">100.0%</td>
+</tr>
+<!-- Row 10: FT Bandaran -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-3">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-status-pending-base"></span>
+<span class="font-headline-sm text-headline-sm text-text-main font-semibold">FT Bandaran</span>
+</div>
+</td>
+<td class="py-2.5 px-2 text-center">
+<span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span>
+</td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-status-on-base text-white text-xs items-center justify-center font-bold">ON</span></td>
+<td class="py-2.5 px-2 text-center"><span class="inline-flex w-7 h-7 rounded bg-surface-container-high text-secondary text-xs items-center justify-center font-bold" title="07 Nov: Belum Pelaporan Shift">-</span></td>
+<td class="py-2.5 px-3 text-right font-data-mono text-data-mono font-semibold text-text-muted">85.7%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Section 5: Detail Rekapitulasi Siap Unduh (Ready for Audit / Print) -->
+<div class="bg-surface-card rounded-xl shadow-sm p-space-md mb-space-lg flex flex-col">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Tabel Detail Audit &amp; Unduh Resmi</h2>
+<span class="font-caption text-caption text-text-muted">Rekapitulasi kumulatif status 10 instalasi (Data source untuk modul Excel &amp; PDF)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<!-- Print Button for On-Screen Browser Preview -->
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-all" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-base">print</span>
+<span>Pratinjau Cetak Web</span>
+</button>
+</div>
+</div>
+<!-- Data Dense Table -->
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-left" id="detailAuditTable">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase">
+<th class="py-3 px-3 w-12 text-center rounded-l">No</th>
+<th class="py-3 px-3">Nama Lokasi Operasional</th>
+<th class="py-3 px-2 text-center">Kategori</th>
+<th class="py-3 px-3 text-center">Hari ON</th>
+<th class="py-3 px-3 text-center">Hari OFF</th>
+<th class="py-3 px-3 text-center">Keaktifan (%)</th>
+<th class="py-3 px-3 rounded-r">Catatan Kendala Dominan</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md divide-y-0">
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">01</td>
+<td class="py-3 px-3 font-semibold text-text-main">AFT Juanda</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">AFT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Operasional prima, 12 kamera online 24/7</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">02</td>
+<td class="py-3 px-3 font-semibold text-text-main">IT Surabaya</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">IT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">28 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-error font-semibold">2 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-warning-surface text-status-warning-base font-bold">93.3%</span>
+</td>
+<td class="py-3 px-3 text-text-main font-body-sm text-body-sm">
+<span class="text-error font-semibold">[03 Nov]</span> Switch Hub Gate Barat drop tegangan, tuntas diperbaiki
+            </td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">03</td>
+<td class="py-3 px-3 font-semibold text-text-main">IT Bima</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">IT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Koneksi microwave link stabil, NVR beroperasi penuh</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">04</td>
+<td class="py-3 px-3 font-semibold text-text-main">LPG Surabaya</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">LPG</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">27 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-error font-semibold">3 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-warning-surface text-status-warning-base font-bold">90.0%</span>
+</td>
+<td class="py-3 px-3 text-text-main font-body-sm text-body-sm">
+<span class="text-error font-semibold">[02 Nov]</span> Jetty 2 terkena maintenance kabel crane
+            </td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">05</td>
+<td class="py-3 px-3 font-semibold text-text-main">BP Gresik</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">BP</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Zero offline time, backup UPS 120 menit aktif</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">06</td>
+<td class="py-3 px-3 font-semibold text-text-main">FT Malang</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Semua 8 channel streaming lancar ke regional desk</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">07</td>
+<td class="py-3 px-3 font-semibold text-text-main">FT Madiun</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">29 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-error font-semibold">1 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-warning-surface text-status-warning-base font-bold">96.7%</span>
+</td>
+<td class="py-3 px-3 text-text-main font-body-sm text-body-sm">
+<span class="text-error font-semibold">[05 Nov]</span> Tangki 04 konektor korosi, diganti waterproof IP67
+            </td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">08</td>
+<td class="py-3 px-3 font-semibold text-text-main">FT Tuban</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Pembersihan berkala lensa outdoor terjadwal aman</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">09</td>
+<td class="py-3 px-3 font-semibold text-text-main">FT Camplong</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">30 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">0 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-on-surface text-status-on-base font-bold">100.0%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Kamera thermal tangki standby tanpa anomali</td>
+</tr>
+<tr class="hover:bg-surface/80 transition-colors">
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-text-muted">10</td>
+<td class="py-3 px-3 font-semibold text-text-main">FT Bandaran</td>
+<td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded font-caption text-caption bg-surface-container text-on-surface-variant font-mono">FT</span></td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-status-on-base font-semibold">28 Hari</td>
+<td class="py-3 px-3 text-center font-data-mono text-data-mono text-error font-semibold">2 Hari</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-1 rounded font-caption text-caption bg-status-warning-surface text-status-warning-base font-bold">93.3%</span>
+</td>
+<td class="py-3 px-3 text-text-muted font-body-sm text-body-sm">Sedang verifikasi log Shift 2; sinyal radio normal</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Modal / Floating Backdrop for Export Confirmation -->
+<div class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-space-md transition-opacity duration-200" id="exportDialog">
+<div class="bg-surface-card rounded-xl shadow-xl max-w-lg w-full p-space-lg flex flex-col relative animate-in fade-in zoom-in-95">
+<button class="absolute top-4 right-4 text-text-muted hover:text-text-main p-1 rounded hover:bg-surface-container transition-colors" onclick="closeExportModal()" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div class="flex items-center gap-space-sm mb-space-md">
+<div class="p-3 rounded-lg bg-status-on-base text-on-primary" id="modalIconContainer">
+<span class="material-symbols-outlined text-2xl" id="modalIcon">table_view</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-md text-headline-md text-text-main font-bold" id="modalTitle">Menyiapkan Berkas Ekspor</h3>
+<span class="font-caption text-caption text-text-muted" id="modalSubtitle">Mesin konversi laporan audit SIAGA-CCTV v2.4.0</span>
+</div>
+</div>
+<!-- Export Details Panel -->
+<div class="bg-surface-container-low rounded-lg p-space-md mb-space-md flex flex-col gap-2 font-body-sm text-body-sm">
+<div class="flex justify-between py-1">
+<span class="text-text-muted">Format Berkas:</span>
+<span class="font-semibold font-mono text-text-main" id="modalFileType">.XLSX (Microsoft Excel OpenXML)</span>
+</div>
+<div class="flex justify-between py-1">
+<span class="text-text-muted">Cakupan Periode:</span>
+<span class="font-semibold text-text-main">01 Nov 2026 - 30 Nov 2026</span>
+</div>
+<div class="flex justify-between py-1">
+<span class="text-text-muted">Jumlah Entri:</span>
+<span class="font-semibold text-text-main">10 Lokasi • 310 Rekaman Sesi Shift</span>
+</div>
+<div class="flex justify-between py-1">
+<span class="text-text-muted">Atribut:</span>
+<span class="font-semibold text-status-on-base" id="modalStylingDetail">Warna Cell Hijau (#16A34A) &amp; Merah (#DC2626)</span>
+</div>
+</div>
+<!-- Action Buttons in Modal -->
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" onclick="closeExportModal()" type="button">
+          Batal
+        </button>
+<button class="flex items-center gap-2 px-space-lg py-2 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-semibold hover:bg-primary transition-all shadow-sm" id="btnExecuteDownload" onclick="executeMockDownload()" type="button">
+<span class="material-symbols-outlined text-base">download</span>
+<span>Unduh Berkas Sekarang</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  let currentExportType = 'excel';
+
+  function triggerExportModal(type) {
+    currentExportType = type;
+    const dialog = document.getElementById('exportDialog');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalIconContainer = document.getElementById('modalIconContainer');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalFileType = document.getElementById('modalFileType');
+    const modalStylingDetail = document.getElementById('modalStylingDetail');
+
+    if (type === 'excel') {
+      modalIcon.textContent = 'table_view';
+      modalIconContainer.className = 'p-3 rounded-lg bg-status-on-base text-on-primary';
+      modalTitle.textContent = 'Export Excel (.xlsx) Lengkap';
+      modalFileType.textContent = 'Microsoft Excel (.xlsx) via exceljs';
+      modalStylingDetail.textContent = 'Format Sel Otomatis, Warna Hijau/Merah, Grid Auto-Width';
+    } else {
+      modalIcon.textContent = 'picture_as_pdf';
+      modalIconContainer.className = 'p-3 rounded-lg bg-error text-on-error';
+      modalTitle.textContent = 'Export Dokumen PDF Resmi';
+      modalFileType.textContent = 'Dokumen PDF Cetak Resmi (A4 Landscape)';
+      modalStylingDetail.textContent = 'Dilengkapi Kop Dinas, Cap Digital SPV, & Lembar Pengesahan';
+    }
+
+    dialog.classList.remove('hidden');
+  }
+
+  function closeExportModal() {
+    const dialog = document.getElementById('exportDialog');
+    dialog.classList.add('hidden');
+  }
+
+  function executeMockDownload() {
+    const btn = document.getElementById('btnExecuteDownload');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-base">sync</span> Memproses Berkas...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const filename = currentExportType === 'excel' 
+        ? 'REKAP_CCTV_REGIONAL_JATIM_NOV_2026.xlsx' 
+        : 'LAPORAN_RESMI_SPV_CCTV_NOV_2026.pdf';
+      
+      const link = document.createElement('a');
+      link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('SIAGA-CCTV Laporan Audit Terverifikasi November 2026');
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      btn.innerHTML = '<span class="material-symbols-outlined text-base">done</span> Terunduh!';
+      setTimeout(() => {
+        closeExportModal();
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }, 1000);
+    }, 900);
+  }
+
+  function setPreset(type, el) {
+    const group = document.getElementById('presetButtonGroup');
+    const buttons = group.querySelectorAll('button');
+    buttons.forEach(b => {
+      b.className = 'px-space-sm py-1 rounded font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-all';
+    });
+    el.className = 'px-space-sm py-1 rounded font-label-sm text-label-sm bg-primary-container text-on-primary font-semibold shadow-xs';
+  }
+
+  function filterCategory(cat) {
+    const rows = document.querySelectorAll('#detailAuditTable tbody tr');
+    rows.forEach(row => {
+      const tag = row.querySelector('td:nth-child(3) span').textContent.trim();
+      if (cat === 'ALL' || tag === cat) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  function filterStatus(stat) {
+    const rows = document.querySelectorAll('#detailAuditTable tbody tr');
+    rows.forEach(row => {
+      const pct = parseFloat(row.querySelector('td:nth-child(6) span').textContent);
+      if (stat === 'ALL') {
+        row.style.display = '';
+      } else if (stat === 'OFF_ONLY') {
+        row.style.display = pct < 100 ? '' : 'none';
+      } else if (stat === 'ON_ONLY') {
+        row.style.display = pct === 100 ? '' : 'none';
+      } else {
+        row.style.display = '';
+      }
+    });
+  }
+</script></main></div></body></html>

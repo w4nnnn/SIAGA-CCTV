@@ -5,7 +5,6 @@ import {
   updateRowStatus,
   updateRowNotes,
   buildExportDownloadUrl,
-  resolveInitialTheme,
   getNavigationItemsForRole,
   updateHistoryEditDraftStatus,
   toggleLocationIdInSelection,
@@ -80,26 +79,6 @@ describe("ui-state helpers for batch form, theme, & export URLs", () => {
     ).toBe(
       "/api/export/excel?startDate=2026-11-01&endDate=2026-11-30&locationId=loc-1&status=OFF"
     );
-  });
-
-  it("menentukan tema awal (light/dark) dari nilai tersimpan atau preferensi sistem", () => {
-    expect(resolveInitialTheme("light", true)).toBe("light");
-    expect(resolveInitialTheme("dark", false)).toBe("dark");
-    expect(resolveInitialTheme(null, true)).toBe("dark");
-    expect(resolveInitialTheme(null, false)).toBe("light");
-  });
-
-  it("menyediakan menu navigasi yang sesuai untuk role PETUGAS dan ADMIN", () => {
-    const petugasNav = getNavigationItemsForRole("PETUGAS");
-    expect(petugasNav.map((n) => n.href)).toEqual(["/petugas", "/petugas/riwayat"]);
-
-    const adminNav = getNavigationItemsForRole("ADMIN");
-    expect(adminNav.map((n) => n.href)).toEqual([
-      "/admin",
-      "/admin/rekap",
-      "/admin/master",
-      "/petugas",
-    ]);
   });
 
   it("mereset catatan menjadi kosong saat draft edit riwayat diubah dari OFF ke ON", () => {

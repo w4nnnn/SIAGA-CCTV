@@ -1,0 +1,134 @@
+import { describe, it, expect } from "vitest";
+import {
+  buildActivityMatrix,
+  buildAuditRows,
+  computeDistribution,
+  computeRecapKpis,
+  filterDashboardItems,
+  getRangePreset,
+  paginate,
+  percentOf,
+  shiftDate,
+} from "../../src/lib/view-models";
+import { applySelectAllOff, getNavigationItemsForRole } from "../../src/lib/ui-state";
+
+const recap = {
+  startDate: "2026-11-01",
+  endDate: "2026-11-03",
+  totalDays: 3,
+  locationSummaries: [
+    { locationId: "a", category: "IT", name: "Bima", displayName: "IT Bima", sortOrder: 1, onDays: 3, offDays: 0, unreportedDays: 0 },
+    { locationId: "b", category: "FT", name: "Tuban", displayName: "FT Tuban", sortOrder: 2, onDays: 1, offDays: 1, unreportedDays: 1 },
+  ],
+  dailyRows: [
+    { reportDate: "2026-11-01", locationId: "a", category: "IT", name: "Bima", displayName: "IT Bima", status: "ON" as const, notes: null, reporterName: null },
+    { reportDate: "2026-11-01", locationId: "b", category: "FT", name: "Tuban", displayName: "FT Tuban", status: "ON" as const, notes: null, reporterName: null },
+    { reportDate: "2026-11-02", locationId: "a", category: "IT", name: "Bima", displayName: "IT Bima", status: "ON" as const, notes: null, reporterName: null },
+    { reportDate: "2026-11-02", locationId: "b", category: "FT", name: "Tuban", displayName: "FT Tuban", status: "OFF" as const, notes: "Switch mati", reporterName: null },
+    { reportDate: "2026-11-03", locationId: "a", category: "IT", name: "Bima", displayName: "IT Bima", status: "ON" as const, notes: null, reporterName: null },
+    { reportDate: "2026-11-03", locationId: "b", category: "FT", name: "Tuban", displayName: "FT Tuban", status: "UNREPORTED" as const, notes: null, reporterName: null },
+  ],
+};
+
+describe("view-models: angka dan persentase", () => {
+  it("percentOf membulatkan 1 desimal dan aman untuk pembagi 0", () => {
+    expect(percentOf(1, 3)).toBe(33.3);
+    expect(percentOf(3, 3)).toBe(100);
+    expect(percentOf(0, 0)).toBe(0);
+  });
+
+  it("computeDistribution menghitung persentase ON/OFF/Belum dan persen operasional", () => {
+    const d = computeDistribution({ totalLocations: 10, onCount: 7, offCount: 2, unreportedCount: 1 });
+    expect(d).toEqual({ onPct: 70, offPct: 20, unreportedPct: 10, operationalPct: 70 });
+    expect(computeDistribution({ totalLocations: 0, onCount: 0, offCount: 0, unreportedCount: 0 }).operationalPct).toBe(0);
+  });
+});
+
+describe("view-models: KPI, matriks, dan baris audit rekap", () => {
+  it("computeRecapKpis: kepatuhan, hari bebas kendala, insiden", () => {
+    const k = computeRecapKpis(recap);
+    expect(k.scheduledCount).toBe(6);
+    expect(k.reportedCount).toBe(5);
+    expect(k.compliancePct).toBe(83.3);
+    expect(k.offFreeDays).toBe(1);
+    expect(k.incidentCount).toBe(1);
+    expect(k.totalDays).toBe(3);
+  });
+
+  it("buildActivityMatrix: tanggal berurutan dan status per sel", () => {
+    const m = buildActivityMatrix(recap);
+    expect(m.dates).toEqual(["2026-11-01", "2026-11-02", "2026-11-03"]);
+    expect(m.rows[1].displayName).toBe("FT Tuban");
+    expect(m.rows[1].cells["2026-11-02"]).toBe("OFF");
+    expect(m.rows[1].cells["2026-11-03"]).toBe("UNREPORTED");
+    expect(m.rows[0].activePct).toBe(100);
+    expect(m.rows[1].activePct).toBe(33.3);
+  });
+
+  it("buildAuditRows: nomor, keaktifan, dan catatan OFF terbaru", () => {
+    const rows = buildAuditRows(recap);
+    expect(rows[0]).toMatchObject({ no: 1, displayName: "IT Bima", onDays: 3, activePct: 100, latestNote: null });
+    expect(rows[1]).toMatchObject({ no: 2, offDays: 1, latestNote: "[2026-11-02] Switch mati" });
+  });
+
+  it("menangani rekap kosong tanpa error", () => {
+    const empty = { ...recap, locationSummaries: [], dailyRows: [] };
+    expect(computeRecapKpis(empty).compliancePct).toBe(0);
+    expect(buildActivityMatrix(empty).rows).toEqual([]);
+  });
+});
+
+describe("view-models: tanggal, filter, pagination", () => {
+  it("shiftDate menggeser hari lintas bulan", () => {
+    expect(shiftDate("2026-11-01", -1)).toBe("2026-10-31");
+    expect(shiftDate("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("getRangePreset: hari ini, minggu ini (mulai Senin), bulan ini", () => {
+    expect(getRangePreset("today", "2026-11-04")).toEqual({ startDate: "2026-11-04", endDate: "2026-11-04" });
+    expect(getRangePreset("week", "2026-11-04")).toEqual({ startDate: "2026-11-02", endDate: "2026-11-04" });
+    expect(getRangePreset("week", "2026-11-08")).toEqual({ startDate: "2026-11-02", endDate: "2026-11-08" });
+    expect(getRangePreset("month", "2026-11-04")).toEqual({ startDate: "2026-11-01", endDate: "2026-11-04" });
+  });
+
+  it("filterDashboardItems memfilter kategori dan kata kunci (case-insensitive)", () => {
+    const items = [
+      { locationId: "1", category: "IT", displayName: "IT Bima", notes: null },
+      { locationId: "2", category: "FT", displayName: "FT Tuban", notes: "Switch mati" },
+    ];
+    expect(filterDashboardItems(items, "ALL", "")).toHaveLength(2);
+    expect(filterDashboardItems(items, "FT", "")).toHaveLength(1);
+    expect(filterDashboardItems(items, "ALL", "switch")).toHaveLength(1);
+    expect(filterDashboardItems(items, "IT", "tuban")).toHaveLength(0);
+  });
+
+  it("paginate membatasi halaman ke rentang valid", () => {
+    const items = Array.from({ length: 12 }, (_, i) => i + 1);
+    expect(paginate(items, 1, 5)).toMatchObject({ items: [1, 2, 3, 4, 5], page: 1, totalPages: 3 });
+    expect(paginate(items, 99, 5)).toMatchObject({ items: [11, 12], page: 3 });
+    expect(paginate([], 1, 5)).toMatchObject({ items: [], page: 1, totalPages: 1 });
+  });
+});
+
+describe("ui-state: navigasi dan tandai semua OFF", () => {
+  it("menu PETUGAS dan ADMIN sesuai desain baru", () => {
+    expect(getNavigationItemsForRole("PETUGAS").map((n) => n.href)).toEqual(["/petugas", "/petugas/riwayat"]);
+    expect(getNavigationItemsForRole("ADMIN").map((n) => n.href)).toEqual([
+      "/admin",
+      "/petugas",
+      "/petugas/riwayat",
+      "/admin/rekap",
+      "/admin/master",
+    ]);
+  });
+
+  it("applySelectAllOff mengubah semua baris menjadi OFF tanpa menghapus catatan", () => {
+    const rows = [
+      { locationId: "1", displayName: "A", status: "ON" as const, notes: "", isAlreadyReported: false },
+      { locationId: "2", displayName: "B", status: "OFF" as const, notes: "mati", isAlreadyReported: true },
+    ];
+    const next = applySelectAllOff(rows);
+    expect(next.every((r) => r.status === "OFF")).toBe(true);
+    expect(next[1].notes).toBe("mati");
+  });
+});

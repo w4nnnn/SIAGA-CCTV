@@ -35,6 +35,12 @@ export function applySelectAllOn(
   }));
 }
 
+export function applySelectAllOff(
+  rows: BatchFormRowState[]
+): BatchFormRowState[] {
+  return rows.map((row) => ({ ...row, status: "OFF" }));
+}
+
 export function updateRowStatus(
   rows: BatchFormRowState[],
   locationId: string,
@@ -85,16 +91,6 @@ export function buildExportDownloadUrl(
   return `/api/export/${format}?${params.toString()}`;
 }
 
-export function resolveInitialTheme(
-  savedTheme: string | null | undefined,
-  prefersDark: boolean
-): "light" | "dark" {
-  if (savedTheme === "light" || savedTheme === "dark") {
-    return savedTheme;
-  }
-  return prefersDark ? "dark" : "light";
-}
-
 export interface NavItem {
   href: string;
   label: string;
@@ -102,18 +98,22 @@ export interface NavItem {
 }
 
 export function getNavigationItemsForRole(role: "ADMIN" | "PETUGAS"): NavItem[] {
+  const input: NavItem = { href: "/petugas", label: "Input Laporan", iconName: "input" };
+  const riwayat: NavItem = {
+    href: "/petugas/riwayat",
+    label: "Riwayat & Edit",
+    iconName: "riwayat",
+  };
   if (role === "ADMIN") {
     return [
       { href: "/admin", label: "Dashboard Harian", iconName: "dashboard" },
+      input,
+      riwayat,
       { href: "/admin/rekap", label: "Rekap & Export", iconName: "rekap" },
-      { href: "/admin/master", label: "Master Lokasi & User", iconName: "master" },
-      { href: "/petugas", label: "Input Laporan", iconName: "input" },
+      { href: "/admin/master", label: "Master Data", iconName: "master" },
     ];
   }
-  return [
-    { href: "/petugas", label: "Input Harian", iconName: "input" },
-    { href: "/petugas/riwayat", label: "Riwayat & Edit", iconName: "riwayat" },
-  ];
+  return [input, riwayat];
 }
 
 export interface HistoryEditDraft {
