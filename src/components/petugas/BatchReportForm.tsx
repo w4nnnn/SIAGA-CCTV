@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Save,
   ShieldCheck,
+  Video,
   Wrench,
 } from "lucide-react";
 import {
@@ -277,119 +278,129 @@ export function BatchReportForm({
           </CardContent>
         </Card>
       ) : (
-        <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3.5 sm:px-4 py-1.5 text-[11px] font-heading font-semibold text-muted-foreground uppercase tracking-wider">
-            <span>Daftar Terminal ({rows.length} Lokasi)</span>
-            <span>Status Kesiapan Kamera</span>
-          </div>
-          <div className="divide-y divide-border/70">
-            {rows.map((row) => {
-              const meta = metaByLocId.get(row.locationId);
-              const cat = meta?.category ?? "LOC";
-              const placeName = meta?.name ?? row.displayName;
-              const isOff = row.status === "OFF";
+        <div className="space-y-3">
+          {rows.map((row) => {
+            const meta = metaByLocId.get(row.locationId);
+            const cat = meta?.category ?? "LOC";
+            const placeName = meta?.name ?? row.displayName;
+            const isOff = row.status === "OFF";
 
-              return (
-                <div
-                  key={row.locationId}
-                  className={cn(
-                    "px-3.5 py-1.5 sm:px-4 sm:py-1.5 transition-colors",
-                    isOff
-                      ? "bg-[var(--color-status-off-surface)]/25"
-                      : "hover:bg-muted/30"
-                  )}
-                >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Location Info */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <CategoryBadge category={cat} className="text-[10px] shrink-0" />
-                      <span className="font-heading text-xs sm:text-sm font-bold text-foreground">
-                        {placeName}
-                      </span>
-                      <span
-                        className={cn(
-                          "rounded-[0.25rem] px-1.5 py-0.5 text-[9px] font-semibold shrink-0 uppercase tracking-wide",
-                          row.isAlreadyReported
-                            ? "border border-[var(--color-status-on-border)] bg-[var(--color-status-on-surface)] text-[var(--color-status-on)]"
-                            : "border border-border bg-muted/60 text-muted-foreground"
-                        )}
-                      >
-                        {row.isAlreadyReported ? "Tersimpan" : "Belum Simpan"}
-                      </span>
+            return (
+              <Card
+                key={row.locationId}
+                className={cn(
+                  "rounded-[0.5rem] border p-3.5 sm:p-4 shadow-xs transition-colors",
+                  isOff
+                    ? "border-[var(--color-status-off-border)]/80 bg-[var(--color-status-off-surface)]/20"
+                    : "border-border bg-card hover:border-border/80"
+                )}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Station Info & Icon Box */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-[0.25rem] border border-border/50 bg-secondary font-mono text-xs font-bold text-primary">
+                      {cat}
                     </div>
 
-                    {/* Segmented Action Buttons */}
-                    <div
-                      role="group"
-                      aria-label={`Pilih status CCTV untuk ${row.displayName}`}
-                      className="flex items-center gap-1.5 shrink-0"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(row.locationId, "ON")}
-                        aria-pressed={row.status === "ON"}
-                        className={cn(
-                          "inline-flex h-7 items-center justify-center gap-1.5 rounded-[0.25rem] border px-2.5 text-[11px] font-heading font-semibold transition-colors cursor-pointer",
-                          row.status === "ON"
-                            ? "border-[var(--color-status-on-solid)] bg-[var(--color-status-on-solid)] text-white shadow-xs"
-                            : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-                        )}
-                      >
-                        <Check className="size-3" aria-hidden="true" />
-                        <span>ON SEMUA</span>
-                      </button>
+                    <div className="flex flex-col">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-heading text-sm font-bold text-foreground sm:text-base">
+                          {placeName}
+                        </span>
+                        <span
+                          className={cn(
+                            "rounded-[0.25rem] px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
+                            row.isAlreadyReported
+                              ? "border border-[var(--color-status-on-border)] bg-[var(--color-status-on-surface)] text-[var(--color-status-on)]"
+                              : "border border-border bg-muted/60 text-muted-foreground"
+                          )}
+                        >
+                          {row.isAlreadyReported ? "Sudah Tersimpan" : "Belum Disimpan"}
+                        </span>
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(row.locationId, "OFF")}
-                        aria-pressed={isOff}
-                        className={cn(
-                          "inline-flex h-7 items-center justify-center gap-1.5 rounded-[0.25rem] border px-2.5 text-[11px] font-heading font-semibold transition-colors cursor-pointer",
-                          isOff
-                            ? "border-[var(--color-status-off-solid)] bg-[var(--color-status-off-solid)] text-white shadow-xs"
-                            : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
-                        )}
-                      >
-                        <AlertTriangle className="size-3" aria-hidden="true" />
-                        <span>ADA KENDALA / OFF</span>
-                      </button>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 font-mono text-[11px]">
+                          <Video className="size-3 text-muted-foreground" /> Kamera Siaga
+                        </span>
+                        <span>&bull;</span>
+                        <span
+                          className={cn(
+                            "text-[11px]",
+                            isOff
+                              ? "font-medium text-[var(--color-status-off)]"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {isOff ? "Terdapat kendala aktif" : "Kondisi terpantau normal"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Conditional Compact Note Input */}
-                  {isOff && (
-                    <div className="mt-2 pt-1.5 border-t border-[var(--color-status-off-border)]/60">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <Label
-                          htmlFor={`notes-${row.locationId}`}
-                          className="text-[11px] font-heading font-semibold text-[var(--color-status-off)] shrink-0"
-                        >
-                          Catatan Kendala:
-                        </Label>
-                        <Input
-                          id={`notes-${row.locationId}`}
-                          type="text"
-                          value={row.notes}
-                          onChange={(e) =>
-                            handleNotesChange(row.locationId, e.target.value)
-                          }
-                          placeholder="Tuliskan kendala spesifik (contoh: Off 3 titik kamera area dermaga, switch mati)..."
-                          className="h-7 text-xs rounded-[0.25rem] border-[var(--color-status-off-border)] focus-visible:ring-[var(--color-status-off-solid)]"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  {/* Toggle Switcher Track Buttons */}
+                  <div
+                    role="group"
+                    aria-label={`Pilih status CCTV untuk ${row.displayName}`}
+                    className="flex items-center gap-1 rounded-[0.25rem] border border-border/50 bg-muted/60 p-1 shrink-0 self-start sm:self-auto"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleStatusChange(row.locationId, "ON")}
+                      aria-pressed={row.status === "ON"}
+                      className={cn(
+                        "inline-flex h-8 items-center justify-center gap-1.5 rounded-[0.2rem] px-3 text-xs font-heading font-semibold transition-all cursor-pointer",
+                        row.status === "ON"
+                          ? "bg-[var(--color-status-on-solid)] text-white shadow-xs"
+                          : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                      )}
+                    >
+                      <Check className="size-3.5" aria-hidden="true" />
+                      <span>ON SEMUA</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleStatusChange(row.locationId, "OFF")}
+                      aria-pressed={isOff}
+                      className={cn(
+                        "inline-flex h-8 items-center justify-center gap-1.5 rounded-[0.2rem] px-3 text-xs font-heading font-semibold transition-all cursor-pointer",
+                        isOff
+                          ? "bg-[var(--color-status-off-solid)] text-white shadow-xs"
+                          : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                      )}
+                    >
+                      <AlertTriangle className="size-3.5" aria-hidden="true" />
+                      <span>ADA KENDALA / OFF</span>
+                    </button>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 bg-muted/20 px-3.5 sm:px-4 py-1.5 text-[11px] text-muted-foreground">
-            <span>Kepatuhan shift: Seluruh terminal siap dilaporkan</span>
-            <span className="font-mono text-[11px] font-semibold text-foreground">
-              {onCount} Normal &bull; {offRows.length} Kendala
-            </span>
-          </div>
-        </Card>
+
+                {/* Collapsible Problem Note Input when OFF */}
+                {isOff && (
+                  <div className="mt-3 border-t border-[var(--color-status-off-border)]/60 pt-3">
+                    <Label
+                      htmlFor={`notes-${row.locationId}`}
+                      className="mb-1.5 block text-xs font-heading font-semibold text-[var(--color-status-off)]"
+                    >
+                      Catatan Kendala Lapangan (Wajib diisi):
+                    </Label>
+                    <Input
+                      id={`notes-${row.locationId}`}
+                      type="text"
+                      value={row.notes}
+                      onChange={(e) =>
+                        handleNotesChange(row.locationId, e.target.value)
+                      }
+                      placeholder="Tuliskan kendala spesifik (contoh: Off 3 titik kamera area dermaga, switch mati)..."
+                      className="h-9 rounded-[0.25rem] border-[var(--color-status-off-border)] bg-background text-xs focus-visible:ring-[var(--color-status-off-solid)]"
+                    />
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
       )}
 
       {/* Diagnostic & Telemetry Status Cards (Matching reference) */}
