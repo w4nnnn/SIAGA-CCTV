@@ -56,9 +56,11 @@ export interface ReportHistoryItem {
   reportDate: string;
   displayName: string;
   category?: string;
+  name?: string;
   status: "ON" | "OFF";
   notes: string | null;
   updatedAt?: Date | null;
+  reporterName?: string | null;
 }
 
 export function ReportHistoryTable({
@@ -358,72 +360,100 @@ export function ReportHistoryTable({
       )}
 
       {/* Main Table */}
-      <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs">
+      <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-border bg-muted/40">
-                  <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Tanggal Laporan
-                  </TableHead>
-                  <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Lokasi Penugasan
-                  </TableHead>
-                  <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Kondisi Operasional
-                  </TableHead>
-                  <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Catatan / Tindak Lanjut
-                  </TableHead>
-                  <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Terakhir Diperbarui
-                  </TableHead>
-                  <TableHead className="text-right font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Aksi
-                  </TableHead>
+            <Table className="min-w-[760px]">
+            <TableHeader>
+              <TableRow className="border-b border-border bg-muted/40">
+                <TableHead className="w-32 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Tanggal Laporan
+                </TableHead>
+                <TableHead className="w-48 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Lokasi Penugasan
+                </TableHead>
+                <TableHead className="w-36 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Kondisi Operasional
+                </TableHead>
+                <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Catatan / Tindak Lanjut
+                </TableHead>
+                <TableHead className="w-44 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Petugas Pelapor
+                </TableHead>
+                <TableHead className="w-24 text-right font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Aksi
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginated.items.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="py-10 text-center text-xs text-muted-foreground"
+                  >
+                    Tidak ada catatan riwayat laporan yang cocok dengan kriteria filter.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginated.items.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="py-10 text-center text-xs text-muted-foreground"
-                    >
-                      Tidak ada catatan riwayat laporan yang cocok dengan kriteria filter.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginated.items.map((item) => (
+              ) : (
+                paginated.items.map((item) => {
+                  const placeName =
+                    item.name ||
+                    (item.category && item.displayName.startsWith(item.category + " ")
+                      ? item.displayName.slice(item.category.length + 1)
+                      : item.displayName);
+
+                  return (
                     <TableRow
                       key={item.id}
                       className="border-b border-border/70 hover:bg-muted/30"
                     >
-                      <TableCell className="whitespace-nowrap font-mono text-xs font-medium text-foreground">
-                        {item.reportDate}
+                      <TableCell className="whitespace-nowrap font-mono text-xs font-semibold text-foreground">
+                        <div>{item.reportDate}</div>
+                        <div className="font-sans text-[10px] text-muted-foreground font-normal">
+                          Shift Harian
+                        </div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap font-heading text-xs font-bold text-foreground">
-                        <div className="flex items-center gap-2">
-                          {item.category && <CategoryBadge category={item.category} />}
-                          <span>{item.displayName}</span>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          {item.category && <CategoryBadge category={item.category} className="text-[10px]" />}
+                          <span className="font-heading text-xs font-bold text-foreground">
+                            {placeName}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         <StatusBadge status={item.status} />
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
-                        {item.notes ?? "-"}
+                      <TableCell className="text-xs">
+                        {item.status === "ON" ? (
+                          <span className="inline-flex items-center gap-1.5 text-muted-foreground italic">
+                            <CheckCircle2 className="size-3 text-[var(--color-status-on)] shrink-0" />
+                            Semua kamera aktif normal
+                          </span>
+                        ) : (
+                          <span className="font-medium text-[var(--color-status-off)]">
+                            {item.notes && item.notes.trim().length > 0
+                              ? item.notes
+                              : "Ada kendala titik kamera"}
+                          </span>
+                        )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
-                        {item.updatedAt
-                          ? new Date(item.updatedAt).toLocaleTimeString("id-ID", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }) + " WIB"
-                          : "-"}
+                      <TableCell className="whitespace-nowrap text-xs">
+                        <div className="font-heading font-semibold text-foreground">
+                          {item.reporterName ?? "Petugas"}
+                        </div>
+                        <div className="font-mono text-[10px] text-muted-foreground">
+                          {item.updatedAt
+                            ? new Date(item.updatedAt).toLocaleTimeString("id-ID", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }) + " WIB"
+                            : "Tersimpan"}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right whitespace-nowrap">
                         <Button
                           type="button"
                           variant="outline"
@@ -436,11 +466,12 @@ export function ReportHistoryTable({
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
           {/* Pagination Footer */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">

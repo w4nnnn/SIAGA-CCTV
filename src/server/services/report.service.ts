@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { dailyReports, locations } from "@/db/schema";
+import { dailyReports, locations, users } from "@/db/schema";
 import { assertCanAccessLocations, SessionUser } from "@/lib/auth";
 import { formatLocationDisplayName } from "@/lib/format";
 import {
@@ -262,9 +262,11 @@ export async function getOperatorReportHistory(
       updatedAt: dailyReports.updatedAt,
       category: locations.category,
       name: locations.name,
+      reporterName: users.name,
     })
     .from(dailyReports)
     .innerJoin(locations, eq(dailyReports.locationId, locations.id))
+    .leftJoin(users, eq(dailyReports.reportedBy, users.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(dailyReports.reportDate), asc(locations.sortOrder));
 

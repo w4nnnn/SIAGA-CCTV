@@ -8,6 +8,7 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  Database,
   Info,
   Loader2,
   RefreshCw,
@@ -165,6 +166,24 @@ export function BatchReportForm({
 
   return (
     <div className="space-y-4">
+      {/* Page Title & Breadcrumb Header */}
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center rounded-[0.25rem] bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground tracking-wider uppercase">
+            Input Telemetri Harian
+          </span>
+          <span className="text-xs text-muted-foreground font-medium">
+            &bull; Shift Operasional Lapangan
+          </span>
+        </div>
+        <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Input Laporan Status CCTV Harian
+        </h1>
+        <p className="text-xs text-muted-foreground sm:text-sm">
+          Laporkan status kesiapan kamera CCTV seluruh terminal penugasan Anda untuk tanggal aktif.
+        </p>
+      </div>
+
       {/* Guidance Alert Callout */}
       <div className="flex items-center gap-2.5 rounded-[0.25rem] border border-border bg-card px-3.5 py-2 text-xs shadow-xs text-muted-foreground">
         <Info className="size-4 shrink-0 text-primary" />
@@ -259,6 +278,10 @@ export function BatchReportForm({
         </Card>
       ) : (
         <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3.5 sm:px-4 py-2 text-xs font-heading font-semibold text-muted-foreground uppercase tracking-wider">
+            <span>Daftar Terminal ({rows.length} Lokasi)</span>
+            <span>Status Kesiapan Kamera</span>
+          </div>
           <div className="divide-y divide-border/70">
             {rows.map((row) => {
               const meta = metaByLocId.get(row.locationId);
@@ -360,7 +383,66 @@ export function BatchReportForm({
               );
             })}
           </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 bg-muted/20 px-3.5 sm:px-4 py-2 text-xs text-muted-foreground">
+            <span>Kepatuhan shift: Seluruh terminal siap dilaporkan</span>
+            <span className="font-mono text-[11px] font-semibold text-foreground">
+              {onCount} Normal &bull; {offRows.length} Kendala
+            </span>
+          </div>
         </Card>
+      )}
+
+      {/* Diagnostic & Telemetry Status Cards (Matching reference) */}
+      {rows.length > 0 && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground font-heading text-xs font-bold">
+                {Math.round((onCount / Math.max(1, rows.length)) * 100)}%
+              </div>
+              <div>
+                <span className="font-heading text-xs font-bold text-foreground">
+                  Indeks Kesiapan Unit
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  {onCount} Normal &bull; {offRows.length} Berkendala
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
+                <ShieldCheck className="size-4 text-[var(--color-status-on)]" />
+              </div>
+              <div>
+                <span className="font-heading text-xs font-bold text-foreground">
+                  Integritas Observasi
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  Audit Mutasi Real-time Pertamina
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
+                <Database className="size-4 text-primary" />
+              </div>
+              <div>
+                <span className="font-heading text-xs font-bold text-foreground">
+                  Mode Penyimpanan
+                </span>
+                <p className="text-[11px] text-muted-foreground">
+                  Atomic Batch Upsert Harian
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Action Bar */}
