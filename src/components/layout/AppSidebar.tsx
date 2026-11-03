@@ -26,7 +26,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogoutConfirmButton } from "./LogoutConfirmButton";
@@ -131,19 +130,6 @@ export function AppSidebar({ user }: { user: SessionUser }) {
           </div>
 
           <LogoutConfirmButton className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[0.25rem] border border-border text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" />
-        </div>
-
-        <SidebarSeparator className="my-1 group-data-[collapsible=icon]:hidden" />
-
-        <div className="flex items-center justify-between px-1 text-[11px] text-muted-foreground group-data-[collapsible=icon]:hidden">
-          <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block size-2 rounded-full bg-[var(--color-status-on-solid)]"
-              aria-hidden="true"
-            />
-            <span>Sistem Normal</span>
-          </div>
-          <span className="font-mono text-[10px]">v2.4</span>
         </div>
       </SidebarFooter>
 
