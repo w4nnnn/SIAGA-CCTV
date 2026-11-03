@@ -29,12 +29,9 @@ export function TopBar({ user }: { user: SessionUser }) {
       <div className="flex items-center gap-3">
         <SidebarTrigger className="cursor-pointer" />
         <div className="h-4 w-px bg-border hidden sm:block" />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex items-center">
           <span className="font-heading text-xs font-semibold text-foreground sm:text-sm">
             {formattedDate}
-          </span>
-          <span className="hidden text-xs text-muted-foreground sm:inline">
-            &bull; Operasional Terverifikasi
           </span>
         </div>
       </div>
