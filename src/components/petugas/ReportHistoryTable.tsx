@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   AlertTriangle,
+  Calendar,
   Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Clock,
   Edit3,
   Filter,
   History,
@@ -17,6 +19,8 @@ import {
   RotateCcw,
   Save,
   ShieldCheck,
+  User,
+  Video,
 } from "lucide-react";
 import {
   type HistoryEditDraft,
@@ -24,14 +28,6 @@ import {
 } from "@/lib/ui-state";
 import { paginate } from "@/lib/view-models";
 import { updateHistoricalReportAction } from "@/server/actions/report.actions";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -359,158 +355,163 @@ export function ReportHistoryTable({
         </div>
       )}
 
-      {/* Main Table */}
-      <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs overflow-hidden">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table className="min-w-[760px]">
-            <TableHeader>
-              <TableRow className="border-b border-border bg-muted/40">
-                <TableHead className="w-32 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Tanggal Laporan
-                </TableHead>
-                <TableHead className="w-48 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Lokasi Penugasan
-                </TableHead>
-                <TableHead className="w-36 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Kondisi Operasional
-                </TableHead>
-                <TableHead className="font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Catatan / Tindak Lanjut
-                </TableHead>
-                <TableHead className="w-44 font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Petugas Pelapor
-                </TableHead>
-                <TableHead className="w-24 text-right font-heading text-xs font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Aksi
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginated.items.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="py-10 text-center text-xs text-muted-foreground"
-                  >
-                    Tidak ada catatan riwayat laporan yang cocok dengan kriteria filter.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginated.items.map((item) => {
-                  const placeName =
-                    item.name ||
-                    (item.category && item.displayName.startsWith(item.category + " ")
-                      ? item.displayName.slice(item.category.length + 1)
-                      : item.displayName);
+      {/* Individual History Cards List */}
+      {paginated.items.length === 0 ? (
+        <Card className="rounded-[0.5rem] border border-border bg-card">
+          <CardContent className="p-8 text-center text-xs text-muted-foreground">
+            Tidak ada catatan riwayat laporan yang cocok dengan kriteria filter.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {paginated.items.map((item) => {
+            const placeName =
+              item.name ||
+              (item.category && item.displayName.startsWith(item.category + " ")
+                ? item.displayName.slice(item.category.length + 1)
+                : item.displayName);
+            const isOff = item.status === "OFF";
 
-                  return (
-                    <TableRow
-                      key={item.id}
-                      className="border-b border-border/70 hover:bg-muted/30"
-                    >
-                      <TableCell className="whitespace-nowrap font-mono text-xs font-semibold text-foreground">
-                        <div>{item.reportDate}</div>
-                        <div className="font-sans text-[10px] text-muted-foreground font-normal">
-                          Shift Harian
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          {item.category && <CategoryBadge category={item.category} className="text-[10px]" />}
-                          <span className="font-heading text-xs font-bold text-foreground">
-                            {placeName}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
+            return (
+              <Card
+                key={item.id}
+                className={cn(
+                  "rounded-[0.5rem] border p-3.5 sm:p-4 shadow-xs transition-colors",
+                  isOff
+                    ? "border-[var(--color-status-off-border)]/80 bg-[var(--color-status-off-surface)]/20"
+                    : "border-border bg-card hover:border-border/80"
+                )}
+              >
+                {/* Header Row: Station Avatar, Name, Status, Date & Koreksi Action */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-[0.25rem] border border-border/50 bg-secondary font-mono text-xs font-bold text-primary">
+                      {item.category ?? "LOC"}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-heading text-sm font-bold text-foreground sm:text-base">
+                          {placeName}
+                        </span>
                         <StatusBadge status={item.status} />
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        {item.status === "ON" ? (
-                          <span className="inline-flex items-center gap-1.5 text-muted-foreground italic">
-                            <CheckCircle2 className="size-3 text-[var(--color-status-on)] shrink-0" />
-                            Semua kamera aktif normal
-                          </span>
-                        ) : (
-                          <span className="font-medium text-[var(--color-status-off)]">
-                            {item.notes && item.notes.trim().length > 0
-                              ? item.notes
-                              : "Ada kendala titik kamera"}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap text-xs">
-                        <div className="font-heading font-semibold text-foreground">
-                          {item.reporterName ?? "Petugas"}
-                        </div>
-                        <div className="font-mono text-[10px] text-muted-foreground">
-                          {item.updatedAt
-                            ? new Date(item.updatedAt).toLocaleTimeString("id-ID", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }) + " WIB"
-                            : "Tersimpan"}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right whitespace-nowrap">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(item)}
-                          className="h-7 cursor-pointer gap-1.5 rounded-[0.25rem] border-border text-xs font-heading font-semibold hover:bg-muted"
-                        >
-                          <Edit3 className="size-3" aria-hidden="true" />
-                          <span>Koreksi</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                      </div>
+
+                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-mono">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="size-3 text-primary" /> {item.reportDate}
+                        </span>
+                        <span>&bull;</span>
+                        <span className="text-[11px] font-sans">Shift Harian Lapangan</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEditDialog(item)}
+                    className="h-8 gap-1.5 rounded-[0.25rem] border-border text-xs font-heading font-semibold hover:bg-muted cursor-pointer shrink-0 self-start sm:self-auto"
+                  >
+                    <Edit3 className="size-3.5" aria-hidden="true" />
+                    <span>Koreksi Laporan</span>
+                  </Button>
+                </div>
+
+                {/* Observation / Notes Block */}
+                <div className="mt-3">
+                  {!isOff ? (
+                    <div className="flex items-center gap-2 rounded-[0.25rem] bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                      <CheckCircle2 className="size-3.5 text-[var(--color-status-on)] shrink-0" />
+                      <span>
+                        {item.notes && item.notes.trim().length > 0
+                          ? item.notes
+                          : "Semua kamera beroperasi normal tanpa kendala titik telemetri."}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2 rounded-[0.25rem] border border-[var(--color-status-off-border)]/60 bg-[var(--color-status-off-surface)]/50 px-3 py-2 text-xs text-[var(--color-status-off)]">
+                      <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="font-semibold block text-[11px] uppercase tracking-wider">
+                          Catatan Kendala Lapangan:
+                        </strong>
+                        <span className="text-xs">
+                          {item.notes && item.notes.trim().length > 0
+                            ? item.notes
+                            : "Terdapat kendala titik kamera lapangan."}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Audit Meta Footer */}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-2.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <User className="size-3 text-muted-foreground" />
+                    <span>
+                      Pelapor: <strong className="text-foreground">{item.reporterName ?? "Petugas Lapangan"}</strong>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                    <Clock className="size-3 text-muted-foreground" />
+                    <span>
+                      {item.updatedAt
+                        ? `Pembaruan: ${new Date(item.updatedAt).toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })} WIB`
+                        : "Tersimpan pada shift operasional"}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+
+          {/* Pagination Card */}
+          <Card className="rounded-[0.5rem] border border-border bg-card p-3 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>
+                Menampilkan {paginated.items.length} dari {filteredItems.length} Data Laporan
+              </span>
+
+              {paginated.totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={paginated.page <= 1}
+                    className="size-7 rounded-[0.25rem] cursor-pointer"
+                  >
+                    <ChevronLeft className="size-3.5" />
+                  </Button>
+
+                  <span className="font-mono text-xs font-semibold px-2">
+                    {paginated.page} / {paginated.totalPages}
+                  </span>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setPage((p) => Math.min(paginated.totalPages, p + 1))}
+                    disabled={paginated.page >= paginated.totalPages}
+                    className="size-7 rounded-[0.25rem] cursor-pointer"
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </Button>
+                </div>
               )}
-            </TableBody>
-          </Table>
+            </div>
+          </Card>
         </div>
-
-          {/* Pagination Footer */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
-            <span>
-              Menampilkan {paginated.items.length} dari {filteredItems.length} Data Laporan
-            </span>
-
-            {paginated.totalPages > 1 && (
-              <div className="flex items-center gap-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={paginated.page <= 1}
-                  className="size-7 rounded-[0.25rem] cursor-pointer"
-                >
-                  <ChevronLeft className="size-3.5" />
-                </Button>
-
-                <span className="font-mono text-xs font-semibold px-2">
-                  {paginated.page} / {paginated.totalPages}
-                </span>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => setPage((p) => Math.min(paginated.totalPages, p + 1))}
-                  disabled={paginated.page >= paginated.totalPages}
-                  className="size-7 rounded-[0.25rem] cursor-pointer"
-                >
-                  <ChevronRight className="size-3.5" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      )}
 
       {/* Audit Trail Disclaimer Banner */}
       <div className="flex items-start gap-3 rounded-[0.5rem] border border-border bg-card p-4 text-xs shadow-xs">
