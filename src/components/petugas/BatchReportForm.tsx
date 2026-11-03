@@ -278,7 +278,7 @@ export function BatchReportForm({
         </Card>
       ) : (
         <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3.5 sm:px-4 py-2 text-xs font-heading font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3.5 sm:px-4 py-1.5 text-[11px] font-heading font-semibold text-muted-foreground uppercase tracking-wider">
             <span>Daftar Terminal ({rows.length} Lokasi)</span>
             <span>Status Kesiapan Kamera</span>
           </div>
@@ -293,13 +293,13 @@ export function BatchReportForm({
                 <div
                   key={row.locationId}
                   className={cn(
-                    "p-3 sm:px-4 sm:py-2.5 transition-colors",
+                    "px-3.5 py-1.5 sm:px-4 sm:py-1.5 transition-colors",
                     isOff
                       ? "bg-[var(--color-status-off-surface)]/25"
                       : "hover:bg-muted/30"
                   )}
                 >
-                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     {/* Location Info */}
                     <div className="flex flex-wrap items-center gap-2">
                       <CategoryBadge category={cat} className="text-[10px] shrink-0" />
@@ -329,13 +329,13 @@ export function BatchReportForm({
                         onClick={() => handleStatusChange(row.locationId, "ON")}
                         aria-pressed={row.status === "ON"}
                         className={cn(
-                          "inline-flex h-8 items-center justify-center gap-1.5 rounded-[0.25rem] border px-3 text-xs font-heading font-semibold transition-colors cursor-pointer",
+                          "inline-flex h-7 items-center justify-center gap-1.5 rounded-[0.25rem] border px-2.5 text-[11px] font-heading font-semibold transition-colors cursor-pointer",
                           row.status === "ON"
                             ? "border-[var(--color-status-on-solid)] bg-[var(--color-status-on-solid)] text-white shadow-xs"
                             : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
                         )}
                       >
-                        <Check className="size-3.5" aria-hidden="true" />
+                        <Check className="size-3" aria-hidden="true" />
                         <span>ON SEMUA</span>
                       </button>
 
@@ -344,13 +344,13 @@ export function BatchReportForm({
                         onClick={() => handleStatusChange(row.locationId, "OFF")}
                         aria-pressed={isOff}
                         className={cn(
-                          "inline-flex h-8 items-center justify-center gap-1.5 rounded-[0.25rem] border px-3 text-xs font-heading font-semibold transition-colors cursor-pointer",
+                          "inline-flex h-7 items-center justify-center gap-1.5 rounded-[0.25rem] border px-2.5 text-[11px] font-heading font-semibold transition-colors cursor-pointer",
                           isOff
                             ? "border-[var(--color-status-off-solid)] bg-[var(--color-status-off-solid)] text-white shadow-xs"
                             : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
                         )}
                       >
-                        <AlertTriangle className="size-3.5" aria-hidden="true" />
+                        <AlertTriangle className="size-3" aria-hidden="true" />
                         <span>ADA KENDALA / OFF</span>
                       </button>
                     </div>
@@ -358,7 +358,7 @@ export function BatchReportForm({
 
                   {/* Conditional Compact Note Input */}
                   {isOff && (
-                    <div className="mt-2.5 pt-2 border-t border-[var(--color-status-off-border)]/60">
+                    <div className="mt-2 pt-1.5 border-t border-[var(--color-status-off-border)]/60">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <Label
                           htmlFor={`notes-${row.locationId}`}
@@ -374,7 +374,7 @@ export function BatchReportForm({
                             handleNotesChange(row.locationId, e.target.value)
                           }
                           placeholder="Tuliskan kendala spesifik (contoh: Off 3 titik kamera area dermaga, switch mati)..."
-                          className="h-8 text-xs rounded-[0.25rem] border-[var(--color-status-off-border)] focus-visible:ring-[var(--color-status-off-solid)]"
+                          className="h-7 text-xs rounded-[0.25rem] border-[var(--color-status-off-border)] focus-visible:ring-[var(--color-status-off-solid)]"
                         />
                       </div>
                     </div>
@@ -383,7 +383,7 @@ export function BatchReportForm({
               );
             })}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 bg-muted/20 px-3.5 sm:px-4 py-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 bg-muted/20 px-3.5 sm:px-4 py-1.5 text-[11px] text-muted-foreground">
             <span>Kepatuhan shift: Seluruh terminal siap dilaporkan</span>
             <span className="font-mono text-[11px] font-semibold text-foreground">
               {onCount} Normal &bull; {offRows.length} Kendala
