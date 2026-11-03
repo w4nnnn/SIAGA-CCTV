@@ -272,7 +272,10 @@ export function DateRangeRecapView({
             </div>
 
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
-              <Label className="block text-xs font-semibold uppercase tracking-wider text-transparent select-none">
+              <Label
+                aria-hidden="true"
+                className="block text-xs font-semibold uppercase tracking-wider text-transparent select-none"
+              >
                 Aksi
               </Label>
               <Button

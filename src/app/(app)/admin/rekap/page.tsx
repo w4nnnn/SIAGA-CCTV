@@ -6,6 +6,8 @@ import { DateRangeRecapView } from "@/components/admin/DateRangeRecapView";
 import { listLocations } from "@/server/services/location.service";
 import { getDateRangeRecap } from "@/server/services/recap.service";
 
+import { getLastDayOfMonth } from "@/lib/view-models";
+
 export default async function AdminRecapPage({
   searchParams,
 }: {
@@ -28,6 +30,7 @@ export default async function AdminRecapPage({
   const params = await searchParams;
   const todayStr = getTodayDateInJakarta();
   const firstDayOfMonth = `${todayStr.slice(0, 7)}-01`;
+  const lastDayOfMonth = getLastDayOfMonth(todayStr);
 
   const startDate =
     params.startDate && /^\d{4}-\d{2}-\d{2}$/.test(params.startDate)
@@ -36,7 +39,7 @@ export default async function AdminRecapPage({
   const endDate =
     params.endDate && /^\d{4}-\d{2}-\d{2}$/.test(params.endDate)
       ? params.endDate
-      : todayStr;
+      : lastDayOfMonth;
 
   const [recap, activeLocations] = await Promise.all([
     getDateRangeRecap({
