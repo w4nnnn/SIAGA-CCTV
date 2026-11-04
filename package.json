@@ -16,9 +16,12 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file=.env src/db/seed.ts",
     "db:seed:simulasi": "tsx --env-file=.env src/db/seed-simulation.ts",
+    "build:seed": "esbuild src/db/seed.ts --bundle --platform=node --target=node22 --outfile=dist/seed.js && esbuild src/db/seed-simulation.ts --bundle --platform=node --target=node22 --outfile=dist/seed-simulation.js",
     "docker:build": "docker build -t siaga-cctv:latest .",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "docker:seed": "docker compose exec app node seed.js",
+    "docker:seed:simulasi": "docker compose exec app node seed-simulation.js"
   },
   "keywords": [],
   "dependencies": {

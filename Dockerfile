@@ -26,6 +26,7 @@ ENV DATABASE_URL=postgresql://dummy:dummy@localhost:5432/siaga_cctv
 ENV AUTH_SECRET=dummy_secret_during_next_build_process_32_chars_min!
 
 RUN npm run build
+RUN npm run build:seed
 
 # ============================================
 # Stage 3: Production Runner
@@ -45,6 +46,12 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nextjs:nodejs /app/dist/seed.js ./seed.js
+COPY --from=builder --chown=nextjs:nodejs /app/dist/seed-simulation.js ./seed-simulation.js
+RUN mkdir -p ./src/db && chown -R nextjs:nodejs ./src
+COPY --from=builder --chown=nextjs:nodejs /app/dist/seed.js ./src/db/seed.js
+COPY --from=builder --chown=nextjs:nodejs /app/dist/seed-simulation.js ./src/db/seed-simulation.js
 
 USER nextjs
 
