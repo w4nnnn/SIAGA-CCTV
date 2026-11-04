@@ -1,11 +1,13 @@
-import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db } from "@/db";
 import { dailyReports, locations, users } from "@/db/schema";
+import { type SessionUser } from "@/lib/auth";
 import {
   formatIndonesianDateHeader,
   formatLocationDisplayName,
 } from "@/lib/format";
 import { recapFilterSchema } from "@/lib/validators";
+import { getUserAssignedLocationIds } from "./user.service";
 
 export interface LocationItem {
   id: string;
@@ -296,18 +298,56 @@ export async function getDailyMonitoringSummary(
   return buildDailyMonitoringRecap(reportDate, activeLocs, reports);
 }
 
-export async function getDateRangeRecap(filterInput: {
-  startDate: string;
-  endDate: string;
-  locationId?: string;
-  status?: "ALL" | "ON" | "OFF" | "UNREPORTED";
-}): Promise<DateRangeRecapResult> {
+export async function getDateRangeRecap(
+  filterInput: {
+    startDate: string;
+    endDate: string;
+    locationId?: string;
+    status?: "ALL" | "ON" | "OFF" | "UNREPORTED";
+  },
+  user?: SessionUser
+): Promise<DateRangeRecapResult> {
   const filter = recapFilterSchema.parse(filterInput);
-  const activeLocs = await db
-    .select()
-    .from(locations)
-    .where(eq(locations.isActive, true))
-    .orderBy(asc(locations.sortOrder), asc(locations.category), asc(locations.name));
+  const assignedIds =
+    user && user.role !== "ADMIN"
+      ? await getUserAssignedLocationIds(user.id)
+      : null;
+
+  if (assignedIds !== null && assignedIds.length === 0) {
+    return buildDateRangeRecap(filter, [], []);
+  }
+
+  const activeLocs =
+    assignedIds === null
+      ? await db
+          .select()
+          .from(locations)
+          .where(eq(locations.isActive, true))
+          .orderBy(
+            asc(locations.sortOrder),
+            asc(locations.category),
+            asc(locations.name)
+          )
+      : await db
+          .select()
+          .from(locations)
+          .where(
+            and(
+              eq(locations.isActive, true),
+              inArray(locations.id, assignedIds)
+            )
+          )
+          .orderBy(
+            asc(locations.sortOrder),
+            asc(locations.category),
+            asc(locations.name)
+          );
+
+  if (activeLocs.length === 0) {
+    return buildDateRangeRecap(filter, [], []);
+  }
+
+  const activeLocIds = activeLocs.map((l) => l.id);
 
   const reportRows = await db
     .select({
@@ -322,7 +362,8 @@ export async function getDateRangeRecap(filterInput: {
     .where(
       and(
         gte(dailyReports.reportDate, filter.startDate),
-        lte(dailyReports.reportDate, filter.endDate)
+        lte(dailyReports.reportDate, filter.endDate),
+        inArray(dailyReports.locationId, activeLocIds)
       )
     );
 

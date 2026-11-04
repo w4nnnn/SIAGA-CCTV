@@ -33,7 +33,7 @@ describe("export.service Excel & PDF generation", () => {
     ]
   );
 
-  it("menghasilkan buffer file Excel (.xlsx) yang valid dengan sheet Ringkasan dan Detail Harian", async () => {
+  it("menghasilkan buffer file Excel (.xlsx) dengan sheet Matriks Pemantauan beku (freeze column), note kendala, dan rekap detail", async () => {
     const buffer = await generateExcelRecapBuffer(recap);
     expect(buffer.byteLength).toBeGreaterThan(1000);
 
@@ -43,11 +43,26 @@ describe("export.service Excel & PDF generation", () => {
       buffer.byteOffset + buffer.byteLength
     ) as ArrayBuffer;
     await workbook.xlsx.load(arrayBuffer);
-    const summarySheet = workbook.getWorksheet("Ringkasan Lokasi");
+
+    const matrixSheet = workbook.getWorksheet("Matriks Pemantauan");
+    expect(matrixSheet).toBeDefined();
+    expect(workbook.worksheets[0].name).toBe("Matriks Pemantauan");
+
+    // Freeze pane aktif
+    const views = matrixSheet?.views ?? [];
+    expect(views.length).toBeGreaterThan(0);
+    const frozenView = views[0] as ExcelJS.WorksheetViewFrozen;
+    expect(frozenView.xSplit).toBe(1);
+
+    // Sel OFF memiliki note catatan kendala
+    // Lokasi baris IT Bima (baris 6), BP Gresik (baris 7). Kolom A = Lokasi, Kolom B = 01, Kolom C = 02.
+    const cellOff = matrixSheet?.getCell("B7");
+    expect(cellOff?.value).toBe("OFF");
+    expect(cellOff?.note).toBeDefined();
+
+    // Sheet detail log tetap tersedia
     const detailSheet = workbook.getWorksheet("Detail Harian");
-    expect(summarySheet).toBeDefined();
     expect(detailSheet).toBeDefined();
-    expect(summarySheet?.getCell("D2").value).toBe("IT Bima");
   });
 
   it("menghasilkan buffer file PDF (%PDF-) yang valid", () => {

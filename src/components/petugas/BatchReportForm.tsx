@@ -403,59 +403,6 @@ export function BatchReportForm({
         </div>
       )}
 
-      {/* Diagnostic & Telemetry Status Cards (Matching reference) */}
-      {rows.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground font-heading text-xs font-bold">
-                {Math.round((onCount / Math.max(1, rows.length)) * 100)}%
-              </div>
-              <div>
-                <span className="font-heading text-xs font-bold text-foreground">
-                  Indeks Kesiapan Unit
-                </span>
-                <p className="text-[11px] text-muted-foreground">
-                  {onCount} Normal &bull; {offRows.length} Berkendala
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
-                <ShieldCheck className="size-4 text-[var(--color-status-on)]" />
-              </div>
-              <div>
-                <span className="font-heading text-xs font-bold text-foreground">
-                  Integritas Observasi
-                </span>
-                <p className="text-[11px] text-muted-foreground">
-                  Audit Mutasi Real-time Pertamina
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="rounded-[0.5rem] border border-border bg-card p-3.5 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-[0.25rem] bg-secondary text-secondary-foreground">
-                <Database className="size-4 text-primary" />
-              </div>
-              <div>
-                <span className="font-heading text-xs font-bold text-foreground">
-                  Mode Penyimpanan
-                </span>
-                <p className="text-[11px] text-muted-foreground">
-                  Atomic Batch Upsert Harian
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
       {/* Action Bar */}
       {rows.length > 0 && (
         <Card className="rounded-[0.5rem] border border-border bg-card p-3 sm:p-4 shadow-xs">

@@ -8,25 +8,30 @@ import {
   Calendar,
   Check,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   ClipboardList,
   Clock,
-  Edit3,
   Filter,
   History,
   Loader2,
   RotateCcw,
   Save,
+  ShieldCheck,
+  TableProperties,
   User,
-  Video,
 } from "lucide-react";
 import {
-  type HistoryEditDraft,
-  updateHistoryEditDraftStatus,
-} from "@/lib/ui-state";
-import { paginate } from "@/lib/view-models";
-import { updateHistoricalReportAction } from "@/server/actions/report.actions";
+  buildOperatorHistoryMatrix,
+  detectActivePreset,
+  getRangePreset,
+  type OperatorHistoryCell,
+  type OperatorHistoryRow,
+} from "@/lib/view-models";
+import { formatIndonesianDateHeader } from "@/lib/format";
+import { getTodayDateInJakarta } from "@/lib/ui-state";
+import {
+  submitBatchDailyReportsAction,
+  updateHistoricalReportAction,
+} from "@/server/actions/report.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -40,10 +45,25 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { CategoryBadge, StatusBadge } from "@/components/common/StatusBadge";
 import { SimpleSelect } from "@/components/common/SimpleSelect";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+export interface AssignedLocationOption {
+  id: string;
+  category?: string;
+  name?: string;
+  displayName: string;
+  sortOrder?: number;
+}
 
 export interface ReportHistoryItem {
   id: string;
@@ -58,115 +78,198 @@ export interface ReportHistoryItem {
   reporterName?: string | null;
 }
 
+interface CellModalState {
+  locationId: string;
+  displayName: string;
+  dateStr: string;
+  reportId: string | null;
+  status: "ON" | "OFF";
+  notes: string;
+  reporterName: string | null;
+  updatedAt: Date | null;
+}
+
 export function ReportHistoryTable({
+  locations,
   items,
+  initialStartDate,
+  initialEndDate,
+  initialLocationId = "ALL",
+  initialStatus = "ALL",
 }: {
+  locations: AssignedLocationOption[];
   items: ReportHistoryItem[];
+  initialStartDate: string;
+  initialEndDate: string;
+  initialLocationId?: string;
+  initialStatus?: "ALL" | "ON" | "OFF" | "UNREPORTED";
 }) {
   const router = useRouter();
-  const [editingItem, setEditingItem] = useState<ReportHistoryItem | null>(null);
-  const [editingDraft, setEditingDraft] = useState<HistoryEditDraft | null>(null);
+  const [startDate, setStartDate] = useState(initialStartDate);
+  const [endDate, setEndDate] = useState(initialEndDate);
+  const [locationId, setLocationId] = useState(initialLocationId);
+  const [status, setStatus] = useState<"ALL" | "ON" | "OFF" | "UNREPORTED">(
+    initialStatus
+  );
+
+  const [activeCellModal, setActiveCellModal] = useState<CellModalState | null>(
+    null
+  );
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Filter states
-  const [filterLocationId, setFilterLocationId] = useState<string>("ALL");
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
-  const [filterStartDate, setFilterStartDate] = useState<string>("");
-  const [filterEndDate, setFilterEndDate] = useState<string>("");
+  const todayStr = useMemo(() => getTodayDateInJakarta(), []);
+  const activePreset = useMemo(
+    () => detectActivePreset(startDate, endDate, todayStr),
+    [startDate, endDate, todayStr]
+  );
 
-  // Pagination state
-  const [page, setPage] = useState<number>(1);
-  const pageSize = 10;
-
-  // Options untuk lokasi
+  // Dropdown options
   const locationOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const item of items) {
-      map.set(item.locationId, item.displayName);
-    }
     return [
       { value: "ALL", label: "Semua Lokasi Penugasan" },
-      ...Array.from(map.entries())
-        .map(([id, name]) => ({ value: id, label: name }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
+      ...locations.map((loc) => ({ value: loc.id, label: loc.displayName })),
     ];
-  }, [items]);
+  }, [locations]);
 
   const statusOptions = [
     { value: "ALL", label: "Semua Status" },
-    { value: "ON", label: "Normal (ON)" },
-    { value: "OFF", label: "Ada Kendala (OFF)" },
+    { value: "ON", label: "Hanya Status ON" },
+    { value: "OFF", label: "Hanya Kendala / OFF" },
+    { value: "UNREPORTED", label: "Hanya Belum Lapor" },
   ];
 
-  // Hitung KPI
-  const totalCount = items.length;
-  const normalCount = items.filter((i) => i.status === "ON").length;
-  const incidentCount = items.filter((i) => i.status === "OFF").length;
+  // Filter lokasi untuk matriks
+  const filteredLocations = useMemo(() => {
+    if (!locationId || locationId === "ALL") return locations;
+    return locations.filter((l) => l.id === locationId);
+  }, [locations, locationId]);
 
-  // Filter items
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (filterLocationId !== "ALL" && item.locationId !== filterLocationId) {
-        return false;
-      }
-      if (filterStatus !== "ALL" && item.status !== filterStatus) {
-        return false;
-      }
-      if (filterStartDate && item.reportDate < filterStartDate) {
-        return false;
-      }
-      if (filterEndDate && item.reportDate > filterEndDate) {
-        return false;
-      }
-      return true;
+  // Bangun matriks riwayat interaktif
+  const matrix = useMemo(() => {
+    return buildOperatorHistoryMatrix({
+      locations: filteredLocations,
+      reports: items,
+      startDate,
+      endDate,
+      statusFilter: status,
     });
-  }, [items, filterLocationId, filterStatus, filterStartDate, filterEndDate]);
+  }, [filteredLocations, items, startDate, endDate, status]);
 
-  const paginated = useMemo(
-    () => paginate(filteredItems, page, pageSize),
-    [filteredItems, page, pageSize]
-  );
+  // Metrik KPI
+  const { totalReported, normalCount, incidentCount, compliancePct } = useMemo(() => {
+    let repCount = 0;
+    let onCount = 0;
+    let offCount = 0;
+    for (const row of matrix.rows) {
+      repCount += row.onDays + row.offDays;
+      onCount += row.onDays;
+      offCount += row.offDays;
+    }
+    const totalScheduled = matrix.rows.length * matrix.dates.length;
+    const compPct =
+      totalScheduled > 0
+        ? Math.round((repCount / totalScheduled) * 1000) / 10
+        : 0;
+
+    return {
+      totalReported: repCount,
+      normalCount: onCount,
+      incidentCount: offCount,
+      compliancePct: compPct,
+    };
+  }, [matrix]);
+
+  const handleApplyFilter = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const params = new URLSearchParams();
+    params.set("startDate", startDate);
+    params.set("endDate", endDate);
+    if (locationId && locationId !== "ALL") params.set("locationId", locationId);
+    if (status && status !== "ALL") params.set("status", status);
+    router.push(`/petugas/riwayat?${params.toString()}`);
+  };
+
+  const handlePreset = (preset: "today" | "7d" | "month" | "30d") => {
+    const range = getRangePreset(preset, todayStr);
+    setStartDate(range.startDate);
+    setEndDate(range.endDate);
+    const params = new URLSearchParams();
+    params.set("startDate", range.startDate);
+    params.set("endDate", range.endDate);
+    if (locationId && locationId !== "ALL") params.set("locationId", locationId);
+    if (status && status !== "ALL") params.set("status", status);
+    router.push(`/petugas/riwayat?${params.toString()}`);
+  };
 
   const handleResetFilter = () => {
-    setFilterLocationId("ALL");
-    setFilterStatus("ALL");
-    setFilterStartDate("");
-    setFilterEndDate("");
-    setPage(1);
+    const range = getRangePreset("month", todayStr);
+    setStartDate(range.startDate);
+    setEndDate(range.endDate);
+    setLocationId("ALL");
+    setStatus("ALL");
+    const params = new URLSearchParams();
+    params.set("startDate", range.startDate);
+    params.set("endDate", range.endDate);
+    router.push(`/petugas/riwayat?${params.toString()}`);
   };
 
-  const openEditDialog = (item: ReportHistoryItem) => {
+  const handleCellClick = (
+    row: OperatorHistoryRow,
+    dateStr: string,
+    cell: OperatorHistoryCell
+  ) => {
     setErrorMessage(null);
-    setEditingItem(item);
-    setEditingDraft({
-      reportId: item.id,
-      status: item.status,
-      notes: item.status === "OFF" ? (item.notes ?? "") : "",
+    setActiveCellModal({
+      locationId: row.locationId,
+      displayName: row.displayName,
+      dateStr,
+      reportId: cell.reportId,
+      status: cell.status === "OFF" ? "OFF" : "ON",
+      notes: cell.notes ?? "",
+      reporterName: cell.reporterName,
+      updatedAt: cell.updatedAt,
     });
   };
 
-  const closeEditDialog = () => {
-    setEditingItem(null);
-    setEditingDraft(null);
-    setErrorMessage(null);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingDraft) return;
+  const handleSaveModal = () => {
+    if (!activeCellModal) return;
     setErrorMessage(null);
 
     startTransition(async () => {
       try {
-        await updateHistoricalReportAction(editingDraft.reportId, {
-          status: editingDraft.status,
-          notes: editingDraft.status === "OFF" ? editingDraft.notes : null,
-        });
-        closeEditDialog();
-        toast.success(`Data laporan ${editingItem?.displayName ?? ""} berhasil diperbarui.`);
+        if (activeCellModal.reportId) {
+          // Update laporan yang sudah ada
+          await updateHistoricalReportAction(activeCellModal.reportId, {
+            status: activeCellModal.status,
+            notes: activeCellModal.status === "OFF" ? activeCellModal.notes : null,
+          });
+          toast.success(
+            `Laporan ${activeCellModal.displayName} (${activeCellModal.dateStr}) berhasil diperbarui.`
+          );
+        } else {
+          // Buat laporan baru untuk tanggal dan lokasi yang belum lapor
+          await submitBatchDailyReportsAction({
+            reportDate: activeCellModal.dateStr,
+            items: [
+              {
+                locationId: activeCellModal.locationId,
+                status: activeCellModal.status,
+                notes:
+                  activeCellModal.status === "OFF" ? activeCellModal.notes : null,
+              },
+            ],
+          });
+          toast.success(
+            `Laporan baru ${activeCellModal.displayName} (${activeCellModal.dateStr}) berhasil disimpan.`
+          );
+        }
+
+        setActiveCellModal(null);
         router.refresh();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Gagal memperbarui laporan.";
+        const msg =
+          err instanceof Error ? err.message : "Gagal menyimpan laporan.";
         setErrorMessage(msg);
         toast.error(msg);
       }
@@ -179,14 +282,15 @@ export function ReportHistoryTable({
       <div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center rounded-[0.25rem] bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground tracking-wider uppercase">
-            Modul Verifikasi &amp; Audit
+            Modul Verifikasi &amp; Audit Riwayat
           </span>
         </div>
         <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Riwayat &amp; Perbaikan Laporan CCTV
         </h1>
         <p className="text-xs text-muted-foreground sm:text-sm">
-          Periksa riwayat observasi harian, audit status kepatuhan, dan perbarui data jika terdapat perbaikan titik kamera.
+          Pantau keaktifan harian dalam tabel matriks per titik lokasi. Klik sel
+          tanggal untuk mengoreksi kendala atau melengkapi shift yang terlewat.
         </p>
       </div>
 
@@ -195,22 +299,19 @@ export function ReportHistoryTable({
         aria-label="Ringkasan Riwayat Log"
         className="grid grid-cols-1 gap-3 sm:grid-cols-3"
       >
-        <Card className="rounded-[0.5rem] border border-border bg-card p-4 shadow-xs">
+        <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-primary bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider">
-              Total Log Tercatat
+              Kepatuhan Lapor Shift
             </span>
-            <ClipboardList className="size-4 text-primary" aria-hidden="true" />
+            <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <div className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
-              {totalCount}
-              <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                Data
-              </span>
+              {compliancePct}%
             </div>
             <span className="rounded-[0.25rem] border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-              Arsip Lapangan
+              {totalReported} Data Terisi
             </span>
           </div>
         </Card>
@@ -218,19 +319,25 @@ export function ReportHistoryTable({
         <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-[var(--color-status-on-solid)] bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-status-on)]">
-              Tervalidasi / Normal
+              Normal (ON)
             </span>
-            <CheckCircle2 className="size-4 text-[var(--color-status-on)]" aria-hidden="true" />
+            <CheckCircle2
+              className="size-4 text-[var(--color-status-on)]"
+              aria-hidden="true"
+            />
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <div className="font-heading text-2xl font-bold text-[var(--color-status-on)] sm:text-3xl">
               {normalCount}
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                Normal
+                Shift
               </span>
             </div>
             <span className="rounded-[0.25rem] border border-[var(--color-status-on-border)] bg-[var(--color-status-on-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-status-on)]">
-              {totalCount > 0 ? Math.round((normalCount / totalCount) * 100) : 0}% Uptime
+              {totalReported > 0
+                ? Math.round((normalCount / totalReported) * 100)
+                : 0}
+              % Uptime
             </span>
           </div>
         </Card>
@@ -238,15 +345,18 @@ export function ReportHistoryTable({
         <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-[var(--color-status-off-solid)] bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-status-off)]">
-              Kendala / OFF-Line
+              Kendala (OFF)
             </span>
-            <AlertTriangle className="size-4 text-[var(--color-status-off)]" aria-hidden="true" />
+            <AlertTriangle
+              className="size-4 text-[var(--color-status-off)]"
+              aria-hidden="true"
+            />
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <div className="font-heading text-2xl font-bold text-[var(--color-status-off)] sm:text-3xl">
               {incidentCount}
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                Titik
+                Catatan
               </span>
             </div>
             <span
@@ -257,295 +367,349 @@ export function ReportHistoryTable({
                   : "border-border bg-muted/60 text-muted-foreground"
               )}
             >
-              {incidentCount > 0 ? "Pernah Berkendala" : "Nihil Anomali"}
+              {incidentCount > 0 ? "Perlu Evaluasi" : "Zero Downtime"}
             </span>
           </div>
         </Card>
       </section>
 
-      {/* Filter Toolbar Card */}
+      {/* Filter and Preset Toolbar Card */}
       <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs">
-        <CardContent className="p-4 sm:p-5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          {/* Preset Buttons & Sync Indicator */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Preset Rentang:
+              </span>
+              {[
+                { id: "today" as const, label: "Hari Ini" },
+                { id: "7d" as const, label: "7 Hari Terakhir" },
+                { id: "month" as const, label: "Bulan Ini" },
+                { id: "30d" as const, label: "30 Hari Terakhir" },
+              ].map((p) => {
+                const isActive = activePreset === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handlePreset(p.id)}
+                    className={cn(
+                      "rounded-[0.25rem] border px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer",
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground shadow-xs font-bold"
+                        : "border-border bg-muted/40 text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {activePreset === "custom" && (
+                <span className="rounded-[0.25rem] border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  Rentang Kustom
+                </span>
+              )}
+              <span className="size-2 rounded-full bg-[var(--color-status-on-solid)]" />
+              <span>Matriks Siaga Terhubung</span>
+            </div>
+          </div>
+
+          {/* Filter Form Controls */}
+          <form
+            onSubmit={handleApplyFilter}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12"
+          >
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-2">
+              <Label
+                htmlFor="filter-start-date"
+                className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Periode Mulai
+              </Label>
+              <Input
+                id="filter-start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-9 w-full rounded-[0.25rem] font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-2">
+              <Label
+                htmlFor="filter-end-date"
+                className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                Periode Sampai
+              </Label>
+              <Input
+                id="filter-end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="h-9 w-full rounded-[0.25rem] font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-3">
+              <Label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Lokasi Penugasan
               </Label>
               <SimpleSelect
-                value={filterLocationId}
-                onValueChange={(val) => {
-                  setFilterLocationId(val);
-                  setPage(1);
-                }}
+                value={locationId}
+                onValueChange={setLocationId}
                 options={locationOptions}
                 className="h-9 rounded-[0.25rem] text-xs"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Status Toleransi
+            <div className="space-y-1.5 sm:col-span-1 lg:col-span-3">
+              <Label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Status Filter
               </Label>
               <SimpleSelect
-                value={filterStatus}
-                onValueChange={(val) => {
-                  setFilterStatus(val);
-                  setPage(1);
-                }}
+                value={status}
+                onValueChange={(val) =>
+                  setStatus(val as "ALL" | "ON" | "OFF" | "UNREPORTED")
+                }
                 options={statusOptions}
                 className="h-9 rounded-[0.25rem] text-xs"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Dari Tanggal
-              </Label>
-              <Input
-                type="date"
-                value={filterStartDate}
-                onChange={(e) => {
-                  setFilterStartDate(e.target.value);
-                  setPage(1);
-                }}
-                className="h-9 rounded-[0.25rem] font-mono text-xs"
-              />
+            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-2">
+              <Button
+                type="submit"
+                className="h-9 flex-1 cursor-pointer gap-2 rounded-[0.25rem] bg-primary font-heading text-xs font-bold text-primary-foreground hover:bg-primary/90"
+              >
+                <Filter className="size-3.5" aria-hidden="true" />
+                <span>Filter</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResetFilter}
+                title="Reset Filter"
+                aria-label="Reset Filter"
+                className="h-9 size-9 shrink-0 cursor-pointer rounded-[0.25rem]"
+              >
+                <RotateCcw className="size-4 text-muted-foreground" />
+              </Button>
             </div>
+          </form>
+        </CardContent>
+      </Card>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Sampai Tanggal
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  type="date"
-                  value={filterEndDate}
-                  onChange={(e) => {
-                    setFilterEndDate(e.target.value);
-                    setPage(1);
-                  }}
-                  className="h-9 rounded-[0.25rem] font-mono text-xs"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={handleResetFilter}
-                  title="Reset Filter"
-                  aria-label="Reset Filter"
-                  className="size-9 shrink-0 cursor-pointer rounded-[0.25rem]"
-                >
-                  <RotateCcw className="size-4 text-muted-foreground" />
-                </Button>
-              </div>
+      {/* Matriks Riwayat Interaktif */}
+      <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs">
+        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <TableProperties className="size-4 text-primary" />
+            <div>
+              <h2 className="font-heading text-sm font-bold text-foreground">
+                Tabel Matriks Pemantauan: {startDate} s/d {endDate}
+              </h2>
+              <p className="text-[11px] text-muted-foreground">
+                Nama lokasi terkunci di kiri. Klik sel tanggal untuk melihat
+                catatan atau mengedit status laporan.
+              </p>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-[11px]">
+            <span className="inline-flex items-center gap-1 text-[var(--color-status-on)]">
+              <span className="size-2 rounded-[0.125rem] bg-[var(--color-status-on-solid)]" />
+              ON (Normal)
+            </span>
+            <span className="inline-flex items-center gap-1 text-[var(--color-status-off)]">
+              <span className="size-2 rounded-[0.125rem] bg-[var(--color-status-off-solid)]" />
+              OFF (Kendala)
+            </span>
+            <span className="inline-flex items-center gap-1 text-muted-foreground">
+              <span className="size-2 rounded-[0.125rem] bg-muted-foreground" />
+              - (Belum Lapor / Klik Isi)
+            </span>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-border bg-muted/40 text-[11px]">
+                  <TableHead
+                    rowSpan={2}
+                    className="sticky left-0 z-30 bg-muted/95 border-r border-border font-heading font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap align-middle"
+                  >
+                    Lokasi Penugasan
+                  </TableHead>
+                  {matrix.monthGroups.map((group) => (
+                    <TableHead
+                      key={group.monthKey}
+                      colSpan={group.dates.length}
+                      className="text-center font-heading text-xs font-bold uppercase tracking-wider text-foreground border-b border-l border-border bg-muted/60 py-2"
+                    >
+                      {group.monthLabel}
+                    </TableHead>
+                  ))}
+                </TableRow>
+                <TableRow className="border-b border-border bg-muted/30 text-[10px]">
+                  {matrix.monthGroups.flatMap((group) =>
+                    group.dates.map((d) => (
+                      <TableHead
+                        key={d.dateStr}
+                        className="text-center font-mono text-[10px] font-bold text-muted-foreground px-1.5 py-1.5 border-l border-border/60 whitespace-nowrap"
+                      >
+                        {d.dayLabel}
+                      </TableHead>
+                    ))
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {matrix.rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={matrix.dates.length + 1}
+                      className="py-12 text-center text-xs text-muted-foreground"
+                    >
+                      Tidak ada titik lokasi penugasan yang sesuai dengan filter.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  matrix.rows.map((row) => (
+                    <TableRow
+                      key={row.locationId}
+                      className="group border-b border-border/70 hover:bg-muted/30"
+                    >
+                      <TableCell className="sticky left-0 z-20 bg-card group-hover:bg-muted/60 border-r border-border font-heading text-xs font-semibold text-foreground whitespace-nowrap">
+                        {row.displayName}
+                      </TableCell>
+                      {matrix.dates.map((d) => {
+                        const cell = row.cells[d];
+                        const isOff = cell?.status === "OFF";
+                        const isOn = cell?.status === "ON";
+                        const hasNotes = Boolean(cell?.notes && cell.notes.trim().length > 0);
+
+                        return (
+                          <TableCell
+                            key={d}
+                            className="p-1 text-center border-l border-border/40"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleCellClick(row, d, cell)}
+                              title={
+                                isOn
+                                  ? `${row.displayName} - ${d}: Normal (Klik untuk koreksi)`
+                                  : isOff
+                                  ? `${row.displayName} - ${d}: OFF (${cell.notes || "Ada Kendala"}) - Klik untuk edit`
+                                  : `${row.displayName} - ${d}: Belum Lapor (Klik untuk isi laporan)`
+                              }
+                              className={cn(
+                                "relative inline-flex items-center justify-center rounded-[0.15rem] px-1.5 py-0.5 text-[9px] font-mono font-bold transition-all cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary",
+                                isOn &&
+                                  "bg-[var(--color-status-on-surface)] text-[var(--color-status-on)] border border-[var(--color-status-on-border)] hover:brightness-95",
+                                isOff &&
+                                  "bg-[var(--color-status-off-surface)] text-[var(--color-status-off)] border border-[var(--color-status-off-border)] hover:brightness-95",
+                                !isOn &&
+                                  !isOff &&
+                                  "bg-muted/60 text-muted-foreground hover:bg-primary/20 hover:text-primary border border-transparent"
+                              )}
+                            >
+                              {isOn ? "ON" : isOff ? "OFF" : "-"}
+                              {isOff && hasNotes && (
+                                <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-destructive" />
+                              )}
+                            </button>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Error Message */}
-      {errorMessage && (
-        <div
-          role="alert"
-          className="flex items-start gap-2.5 rounded-[0.25rem] border border-[var(--color-status-off-border)] bg-[var(--color-status-off-surface)] p-3.5 text-xs font-medium text-[var(--color-status-off)]"
-        >
-          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Individual History Cards List */}
-      {paginated.items.length === 0 ? (
-        <Card className="rounded-[0.5rem] border border-border bg-card">
-          <CardContent className="p-8 text-center text-xs text-muted-foreground">
-            Tidak ada catatan riwayat laporan yang cocok dengan kriteria filter.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {paginated.items.map((item) => {
-            const placeName =
-              item.name ||
-              (item.category && item.displayName.startsWith(item.category + " ")
-                ? item.displayName.slice(item.category.length + 1)
-                : item.displayName);
-            const isOff = item.status === "OFF";
-
-            return (
-              <Card
-                key={item.id}
-                className={cn(
-                  "rounded-[0.5rem] border p-3.5 sm:p-4 shadow-xs transition-colors",
-                  isOff
-                    ? "border-[var(--color-status-off-border)]/80 bg-[var(--color-status-off-surface)]/20"
-                    : "border-border bg-card hover:border-border/80"
-                )}
-              >
-                {/* Header Row: Station Avatar, Name, Status, Date & Koreksi Action */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-[0.25rem] border border-border/50 bg-secondary font-mono text-xs font-bold text-primary">
-                      {item.category ?? "LOC"}
-                    </div>
-
-                    <div className="flex flex-col">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-heading text-sm font-bold text-foreground sm:text-base">
-                          {placeName}
-                        </span>
-                        <StatusBadge status={item.status} />
-                      </div>
-
-                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-mono">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="size-3 text-primary" /> {item.reportDate}
-                        </span>
-                        <span>&bull;</span>
-                        <span className="text-[11px] font-sans">Shift Harian Lapangan</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(item)}
-                    className="h-8 gap-1.5 rounded-[0.25rem] border-border text-xs font-heading font-semibold hover:bg-muted cursor-pointer shrink-0 self-start sm:self-auto"
-                  >
-                    <Edit3 className="size-3.5" aria-hidden="true" />
-                    <span>Koreksi Laporan</span>
-                  </Button>
-                </div>
-
-                {/* Observation / Notes Block */}
-                <div className="mt-3">
-                  {!isOff ? (
-                    <div className="flex items-center gap-2 rounded-[0.25rem] bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                      <CheckCircle2 className="size-3.5 text-[var(--color-status-on)] shrink-0" />
-                      <span>
-                        {item.notes && item.notes.trim().length > 0
-                          ? item.notes
-                          : "Semua kamera beroperasi normal tanpa kendala titik telemetri."}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-2 rounded-[0.25rem] border border-[var(--color-status-off-border)]/60 bg-[var(--color-status-off-surface)]/50 px-3 py-2 text-xs text-[var(--color-status-off)]">
-                      <AlertTriangle className="size-3.5 shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="font-semibold block text-[11px] uppercase tracking-wider">
-                          Catatan Kendala Lapangan:
-                        </strong>
-                        <span className="text-xs">
-                          {item.notes && item.notes.trim().length > 0
-                            ? item.notes
-                            : "Terdapat kendala titik kamera lapangan."}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Audit Meta Footer */}
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-2.5 text-[11px] text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <User className="size-3 text-muted-foreground" />
-                    <span>
-                      Pelapor: <strong className="text-foreground">{item.reporterName ?? "Petugas Lapangan"}</strong>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                    <Clock className="size-3 text-muted-foreground" />
-                    <span>
-                      {item.updatedAt
-                        ? `Pembaruan: ${new Date(item.updatedAt).toLocaleTimeString("id-ID", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })} WIB`
-                        : "Tersimpan pada shift operasional"}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-
-          {/* Pagination Card */}
-          <Card className="rounded-[0.5rem] border border-border bg-card p-3 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-              <span>
-                Menampilkan {paginated.items.length} dari {filteredItems.length} Data Laporan
-              </span>
-
-              {paginated.totalPages > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={paginated.page <= 1}
-                    className="size-7 rounded-[0.25rem] cursor-pointer"
-                  >
-                    <ChevronLeft className="size-3.5" />
-                  </Button>
-
-                  <span className="font-mono text-xs font-semibold px-2">
-                    {paginated.page} / {paginated.totalPages}
-                  </span>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => setPage((p) => Math.min(paginated.totalPages, p + 1))}
-                    disabled={paginated.page >= paginated.totalPages}
-                    className="size-7 rounded-[0.25rem] cursor-pointer"
-                  >
-                    <ChevronRight className="size-3.5" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Edit Dialog Modal (Koreksi Data) */}
+      {/* Edit / Input Dialog Modal */}
       <Dialog
-        open={Boolean(editingItem)}
+        open={Boolean(activeCellModal)}
         onOpenChange={(open) => {
-          if (!open) closeEditDialog();
+          if (!open) {
+            setActiveCellModal(null);
+            setErrorMessage(null);
+          }
         }}
       >
         <DialogContent className="rounded-[0.5rem] border border-border bg-card sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-heading text-base font-bold text-foreground">
-              Edit Laporan Terpilih: Koreksi Data
+              {activeCellModal?.reportId
+                ? "Koreksi Laporan Harian"
+                : "Input Laporan Susulan"}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Perbarui status CCTV bila terdapat koreksi pengamatan atau tindak lanjut teknisi.
+              {activeCellModal?.reportId
+                ? "Perbarui kondisi titik kamera operasional bila terdapat tindak lanjut atau koreksi."
+                : "Isi laporan pengawasan untuk tanggal dan lokasi yang belum tercatat."}
             </DialogDescription>
           </DialogHeader>
 
-          {editingItem && editingDraft && (
+          {activeCellModal && (
             <div className="space-y-4 py-2 text-xs">
-              {/* Metadata Card Read-Only */}
+              {/* Metadata Card */}
               <div className="rounded-[0.25rem] border border-border bg-muted/40 p-3 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tanggal Laporan:</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Tanggal:</span>
                   <span className="font-mono font-bold text-foreground">
-                    {editingItem.reportDate}
+                    {formatIndonesianDateHeader(activeCellModal.dateStr)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Lokasi Penugasan:</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Lokasi:</span>
                   <span className="font-heading font-bold text-foreground">
-                    {editingItem.displayName}
+                    {activeCellModal.displayName}
                   </span>
                 </div>
+                {activeCellModal.reporterName && (
+                  <div className="flex justify-between items-center pt-1 border-t border-border/50 text-[11px]">
+                    <span className="text-muted-foreground">Petugas Pelapor:</span>
+                    <span className="font-semibold text-foreground">
+                      {activeCellModal.reporterName}
+                    </span>
+                  </div>
+                )}
+                {activeCellModal.updatedAt && (
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-muted-foreground">Terakhir Diperbarui:</span>
+                    <span className="font-mono text-muted-foreground">
+                      {new Date(activeCellModal.updatedAt).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      WIB
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* Error Alert */}
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2.5 rounded-[0.25rem] border border-[var(--color-status-off-border)] bg-[var(--color-status-off-surface)] p-3 text-xs font-medium text-[var(--color-status-off)]"
+                >
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
               {/* Status Selector */}
               <div className="space-y-1.5">
@@ -556,12 +720,16 @@ export function ReportHistoryTable({
                   <button
                     type="button"
                     onClick={() =>
-                      setEditingDraft(updateHistoryEditDraftStatus(editingDraft, "ON"))
+                      setActiveCellModal({
+                        ...activeCellModal,
+                        status: "ON",
+                        notes: "",
+                      })
                     }
                     className={cn(
                       "flex h-9 items-center justify-center gap-1.5 rounded-[0.25rem] border text-xs font-heading font-semibold transition-colors cursor-pointer",
-                      editingDraft.status === "ON"
-                        ? "border-[var(--color-status-on-solid)] bg-[var(--color-status-on-solid)] text-white shadow-xs"
+                      activeCellModal.status === "ON"
+                        ? "border-[var(--color-status-on-solid)] bg-[var(--color-status-on-solid)] text-white shadow-xs font-bold"
                         : "border-border bg-card text-muted-foreground hover:bg-muted"
                     )}
                   >
@@ -572,12 +740,15 @@ export function ReportHistoryTable({
                   <button
                     type="button"
                     onClick={() =>
-                      setEditingDraft(updateHistoryEditDraftStatus(editingDraft, "OFF"))
+                      setActiveCellModal({
+                        ...activeCellModal,
+                        status: "OFF",
+                      })
                     }
                     className={cn(
                       "flex h-9 items-center justify-center gap-1.5 rounded-[0.25rem] border text-xs font-heading font-semibold transition-colors cursor-pointer",
-                      editingDraft.status === "OFF"
-                        ? "border-[var(--color-status-off-solid)] bg-[var(--color-status-off-solid)] text-white shadow-xs"
+                      activeCellModal.status === "OFF"
+                        ? "border-[var(--color-status-off-solid)] bg-[var(--color-status-off-solid)] text-white shadow-xs font-bold"
                         : "border-border bg-card text-muted-foreground hover:bg-muted"
                     )}
                   >
@@ -587,40 +758,40 @@ export function ReportHistoryTable({
                 </div>
               </div>
 
-              {/* Notes Textarea */}
-              {editingDraft.status === "OFF" ? (
+              {/* Notes Input */}
+              {activeCellModal.status === "OFF" ? (
                 <div className="space-y-1.5">
                   <Label
-                    htmlFor="dialog-edit-notes"
+                    htmlFor="dialog-modal-notes"
                     className="font-heading text-xs font-semibold text-destructive"
                   >
                     Catatan Kendala &amp; Tindak Lanjut
                   </Label>
                   <Textarea
-                    id="dialog-edit-notes"
+                    id="dialog-modal-notes"
                     rows={3}
-                    value={editingDraft.notes}
+                    value={activeCellModal.notes}
                     onChange={(e) =>
-                      setEditingDraft({
-                        ...editingDraft,
+                      setActiveCellModal({
+                        ...activeCellModal,
                         notes: e.target.value,
                       })
                     }
-                    placeholder="Contoh: Kamera gate 2 flickering saat hujan lebat. Sedang dalam perbaikan teknisi..."
+                    placeholder="Contoh: Kamera gate 2 flickering saat hujan. Sedang dalam perbaikan teknisi..."
                     className="rounded-[0.25rem] border-destructive/50 text-xs focus-visible:ring-destructive"
                   />
                 </div>
               ) : (
                 <div className="rounded-[0.25rem] border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground italic">
-                  Catatan kendala otomatis dibersihkan saat kondisi dipulihkan ke ON SEMUA.
+                  Kondisi ON SEMUA menandakan seluruh kamera beroperasi normal tanpa kendala.
                 </div>
               )}
 
-              {/* Audit Metadata Notice */}
+              {/* Audit Notice */}
               <div className="rounded-[0.25rem] border border-border/80 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
                 <History className="mr-1.5 inline size-3" />
                 <span>
-                  Log ini akan diperbarui dan ditandai riwayat revisinya ke sistem pusat.
+                  Log perbaikan tersimpan dengan cap waktu audit otomatis ke sistem.
                 </span>
               </div>
             </div>
@@ -632,7 +803,10 @@ export function ReportHistoryTable({
               variant="outline"
               size="sm"
               disabled={isPending}
-              onClick={closeEditDialog}
+              onClick={() => {
+                setActiveCellModal(null);
+                setErrorMessage(null);
+              }}
               className="cursor-pointer rounded-[0.25rem] text-xs font-heading font-semibold"
             >
               Batal
@@ -641,7 +815,7 @@ export function ReportHistoryTable({
               type="button"
               size="sm"
               disabled={isPending}
-              onClick={handleSaveEdit}
+              onClick={handleSaveModal}
               className="cursor-pointer gap-1.5 rounded-[0.25rem] bg-primary text-xs font-heading font-bold text-primary-foreground hover:bg-primary/90"
             >
               {isPending ? (
@@ -652,7 +826,7 @@ export function ReportHistoryTable({
               ) : (
                 <>
                   <Save className="size-3.5" aria-hidden="true" />
-                  <span>Simpan Perubahan Laporan</span>
+                  <span>Simpan Laporan</span>
                 </>
               )}
             </Button>

@@ -2,16 +2,20 @@ import { describe, it, expect } from "vitest";
 import {
   buildActivityMatrix,
   buildAuditRows,
+  buildOperatorHistoryMatrix,
   computeDistribution,
   computeRecapKpis,
+  enumerateDateRange,
   filterDashboardItems,
   getLastDayOfMonth,
   getRangePreset,
+  groupDatesByMonth,
   detectActivePreset,
   paginate,
   percentOf,
   shiftDate,
 } from "../../src/lib/view-models";
+import { formatIndonesianMonthYear } from "../../src/lib/format";
 import { applySelectAllOff, getNavigationItemsForRole } from "../../src/lib/ui-state";
 
 const recap = {
@@ -57,14 +61,127 @@ describe("view-models: KPI, matriks, dan baris audit rekap", () => {
     expect(k.totalDays).toBe(3);
   });
 
-  it("buildActivityMatrix: tanggal berurutan dan status per sel", () => {
+  it("buildActivityMatrix: tanggal berurutan, grup bulan, dan status per sel", () => {
     const m = buildActivityMatrix(recap);
     expect(m.dates).toEqual(["2026-11-01", "2026-11-02", "2026-11-03"]);
+    expect(m.monthGroups).toEqual([
+      {
+        monthKey: "2026-11",
+        monthLabel: "November 2026",
+        dates: [
+          { dateStr: "2026-11-01", dayLabel: "01" },
+          { dateStr: "2026-11-02", dayLabel: "02" },
+          { dateStr: "2026-11-03", dayLabel: "03" },
+        ],
+      },
+    ]);
     expect(m.rows[1].displayName).toBe("FT Tuban");
     expect(m.rows[1].cells["2026-11-02"]).toBe("OFF");
     expect(m.rows[1].cells["2026-11-03"]).toBe("UNREPORTED");
     expect(m.rows[0].activePct).toBe(100);
     expect(m.rows[1].activePct).toBe(33.3);
+  });
+
+  it("enumerateDateRange & groupDatesByMonth: mengelompokkan tanggal lintas bulan dengan label 2 digit", () => {
+    expect(formatIndonesianMonthYear("2026-11")).toBe("November 2026");
+    expect(formatIndonesianMonthYear("2026-01-15")).toBe("Januari 2026");
+    expect(enumerateDateRange("2026-11-05", "2026-11-01")).toEqual([]);
+
+    const dates = enumerateDateRange("2026-10-30", "2026-11-02");
+    expect(dates).toEqual([
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+      "2026-11-02",
+    ]);
+
+    const groups = groupDatesByMonth(dates);
+    expect(groups).toEqual([
+      {
+        monthKey: "2026-10",
+        monthLabel: "Oktober 2026",
+        dates: [
+          { dateStr: "2026-10-30", dayLabel: "30" },
+          { dateStr: "2026-10-31", dayLabel: "31" },
+        ],
+      },
+      {
+        monthKey: "2026-11",
+        monthLabel: "November 2026",
+        dates: [
+          { dateStr: "2026-11-01", dayLabel: "01" },
+          { dateStr: "2026-11-02", dayLabel: "02" },
+        ],
+      },
+    ]);
+  });
+
+  it("buildOperatorHistoryMatrix: membangun matriks lokasi x tanggal beserta detail laporan dan filter status", () => {
+    const locations = [
+      { id: "loc-1", category: "IT", name: "Bima", displayName: "IT Bima" },
+      { id: "loc-2", category: "FT", name: "Tuban", displayName: "FT Tuban" },
+    ];
+    const reports = [
+      {
+        id: "rep-1",
+        locationId: "loc-1",
+        reportDate: "2026-11-01",
+        displayName: "IT Bima",
+        category: "IT",
+        name: "Bima",
+        status: "ON" as const,
+        notes: null,
+        reporterName: "Budi",
+        updatedAt: new Date("2026-11-01T08:00:00Z"),
+      },
+      {
+        id: "rep-2",
+        locationId: "loc-2",
+        reportDate: "2026-11-02",
+        displayName: "FT Tuban",
+        category: "FT",
+        name: "Tuban",
+        status: "OFF" as const,
+        notes: "Kamera mati 1",
+        reporterName: "Andi",
+        updatedAt: new Date("2026-11-02T09:00:00Z"),
+      },
+    ];
+
+    const matrixAll = buildOperatorHistoryMatrix({
+      locations,
+      reports,
+      startDate: "2026-11-01",
+      endDate: "2026-11-02",
+    });
+
+    expect(matrixAll.dates).toEqual(["2026-11-01", "2026-11-02"]);
+    expect(matrixAll.rows).toHaveLength(2);
+    expect(matrixAll.rows[0].cells["2026-11-01"]).toMatchObject({
+      reportId: "rep-1",
+      status: "ON",
+      reporterName: "Budi",
+    });
+    expect(matrixAll.rows[0].cells["2026-11-02"]).toMatchObject({
+      reportId: null,
+      status: "UNREPORTED",
+    });
+    expect(matrixAll.rows[1].cells["2026-11-02"]).toMatchObject({
+      reportId: "rep-2",
+      status: "OFF",
+      notes: "Kamera mati 1",
+    });
+
+    // Filter hanya lokasi yang punya status OFF pada rentang tersebut
+    const matrixOffOnly = buildOperatorHistoryMatrix({
+      locations,
+      reports,
+      startDate: "2026-11-01",
+      endDate: "2026-11-02",
+      statusFilter: "OFF",
+    });
+    expect(matrixOffOnly.rows).toHaveLength(1);
+    expect(matrixOffOnly.rows[0].locationId).toBe("loc-2");
   });
 
   it("buildAuditRows: nomor, keaktifan, dan catatan OFF terbaru", () => {
@@ -132,7 +249,11 @@ describe("view-models: tanggal, filter, pagination", () => {
 
 describe("ui-state: navigasi dan tandai semua OFF", () => {
   it("menu PETUGAS dan ADMIN sesuai desain baru", () => {
-    expect(getNavigationItemsForRole("PETUGAS").map((n) => n.href)).toEqual(["/petugas", "/petugas/riwayat"]);
+    expect(getNavigationItemsForRole("PETUGAS").map((n) => n.href)).toEqual([
+      "/petugas",
+      "/petugas/riwayat",
+      "/admin/rekap",
+    ]);
     expect(getNavigationItemsForRole("ADMIN").map((n) => n.href)).toEqual([
       "/admin",
       "/petugas",

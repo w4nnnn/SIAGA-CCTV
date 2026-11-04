@@ -4,6 +4,7 @@ import { auth, type SessionUser } from "@/lib/auth";
 import { getTodayDateInJakarta } from "@/lib/ui-state";
 import { DateRangeRecapView } from "@/components/admin/DateRangeRecapView";
 import { listLocations } from "@/server/services/location.service";
+import { getAssignedLocationsForUser } from "@/server/services/report.service";
 import { getDateRangeRecap } from "@/server/services/recap.service";
 
 import { getLastDayOfMonth } from "@/lib/view-models";
@@ -23,9 +24,6 @@ export default async function AdminRecapPage({
   if (!user?.id) {
     redirect("/login");
   }
-  if (user.role !== "ADMIN") {
-    redirect("/petugas");
-  }
 
   const params = await searchParams;
   const todayStr = getTodayDateInJakarta();
@@ -42,13 +40,18 @@ export default async function AdminRecapPage({
       : lastDayOfMonth;
 
   const [recap, activeLocations] = await Promise.all([
-    getDateRangeRecap({
-      startDate,
-      endDate,
-      locationId: params.locationId,
-      status: params.status ?? "ALL",
-    }),
-    listLocations({ activeOnly: true }),
+    getDateRangeRecap(
+      {
+        startDate,
+        endDate,
+        locationId: params.locationId,
+        status: params.status ?? "ALL",
+      },
+      user
+    ),
+    user.role === "ADMIN"
+      ? listLocations({ activeOnly: true })
+      : getAssignedLocationsForUser(user),
   ]);
 
   return (

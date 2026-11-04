@@ -104,16 +104,21 @@ export function getNavigationItemsForRole(role: "ADMIN" | "PETUGAS"): NavItem[] 
     label: "Riwayat & Edit",
     iconName: "riwayat",
   };
+  const rekap: NavItem = {
+    href: "/admin/rekap",
+    label: "Rekap & Export",
+    iconName: "rekap",
+  };
   if (role === "ADMIN") {
     return [
       { href: "/admin", label: "Dashboard Harian", iconName: "dashboard" },
       input,
       riwayat,
-      { href: "/admin/rekap", label: "Rekap & Export", iconName: "rekap" },
+      rekap,
       { href: "/admin/master", label: "Master Data", iconName: "master" },
     ];
   }
-  return [input, riwayat];
+  return [input, riwayat, rekap];
 }
 
 export interface HistoryEditDraft {

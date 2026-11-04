@@ -43,3 +43,11 @@ export function formatIndonesianDateHeader(dateStr: string): string {
 
   return `${dayName}, ${paddedDay} ${monthName} ${year}`;
 }
+
+export function formatIndonesianMonthYear(monthKeyOrDate: string): string {
+  const parts = monthKeyOrDate.split("-");
+  const year = Number(parts[0]);
+  const monthIndex = Number(parts[1]) - 1;
+  const monthName = INDONESIAN_MONTHS[monthIndex] ?? parts[1];
+  return `${monthName} ${year}`;
+}

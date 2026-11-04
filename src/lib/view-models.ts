@@ -2,8 +2,56 @@ import type {
   DateRangeRecapResult,
   DailyMonitoringSummary,
 } from "@/server/services/recap.service";
+import { formatIndonesianMonthYear } from "@/lib/format";
 
 export type ReportCellStatus = "ON" | "OFF" | "UNREPORTED";
+
+export interface MonthColumnGroup {
+  monthKey: string;
+  monthLabel: string;
+  dates: Array<{
+    dateStr: string;
+    dayLabel: string;
+  }>;
+}
+
+export function enumerateDateRange(startDate: string, endDate: string): string[] {
+  if (!startDate || !endDate || startDate > endDate) return [];
+  const dates: string[] = [];
+  const [sy, sm, sd] = startDate.split("-").map(Number);
+  const [ey, em, ed] = endDate.split("-").map(Number);
+
+  const cur = new Date(Date.UTC(sy, sm - 1, sd));
+  const end = new Date(Date.UTC(ey, em - 1, ed));
+
+  while (cur.getTime() <= end.getTime()) {
+    const y = cur.getUTCFullYear();
+    const m = String(cur.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(cur.getUTCDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+export function groupDatesByMonth(dates: string[]): MonthColumnGroup[] {
+  const groups: MonthColumnGroup[] = [];
+  for (const dateStr of dates) {
+    const monthKey = dateStr.slice(0, 7);
+    const dayLabel = dateStr.slice(8, 10);
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && lastGroup.monthKey === monthKey) {
+      lastGroup.dates.push({ dateStr, dayLabel });
+    } else {
+      groups.push({
+        monthKey,
+        monthLabel: formatIndonesianMonthYear(monthKey),
+        dates: [{ dateStr, dayLabel }],
+      });
+    }
+  }
+  return groups;
+}
 
 export function percentOf(part: number, total: number): number {
   if (total <= 0) return 0;
@@ -56,7 +104,11 @@ export function computeRecapKpis(recap: DateRangeRecapResult) {
 }
 
 export function buildActivityMatrix(recap: DateRangeRecapResult) {
-  const dates = Array.from(new Set(recap.dailyRows.map((r) => r.reportDate))).sort();
+  const dates =
+    recap.startDate && recap.endDate
+      ? enumerateDateRange(recap.startDate, recap.endDate)
+      : Array.from(new Set(recap.dailyRows.map((r) => r.reportDate))).sort();
+  const monthGroups = groupDatesByMonth(dates);
   const cellByKey = new Map<string, ReportCellStatus>();
   for (const row of recap.dailyRows) {
     cellByKey.set(`${row.locationId}:${row.reportDate}`, row.status);
@@ -74,7 +126,133 @@ export function buildActivityMatrix(recap: DateRangeRecapResult) {
       activePct: percentOf(loc.onDays, recap.totalDays),
     };
   });
-  return { dates, rows };
+  return { dates, monthGroups, rows };
+}
+
+export interface OperatorHistoryCell {
+  dateStr: string;
+  status: ReportCellStatus;
+  reportId: string | null;
+  notes: string | null;
+  reporterName: string | null;
+  updatedAt: Date | null;
+}
+
+export interface OperatorHistoryRow {
+  locationId: string;
+  category: string;
+  name: string;
+  displayName: string;
+  cells: Record<string, OperatorHistoryCell>;
+  onDays: number;
+  offDays: number;
+  unreportedDays: number;
+  activePct: number;
+}
+
+export function buildOperatorHistoryMatrix({
+  locations,
+  reports,
+  startDate,
+  endDate,
+  statusFilter = "ALL",
+}: {
+  locations: Array<{
+    id: string;
+    category?: string;
+    name?: string;
+    displayName: string;
+  }>;
+  reports: Array<{
+    id: string;
+    locationId: string;
+    reportDate: string;
+    status: "ON" | "OFF";
+    notes: string | null;
+    reporterName?: string | null;
+    updatedAt?: Date | null;
+  }>;
+  startDate: string;
+  endDate: string;
+  statusFilter?: string;
+}) {
+  const dates = enumerateDateRange(startDate, endDate);
+  const monthGroups = groupDatesByMonth(dates);
+  const reportByKey = new Map<
+    string,
+    {
+      id: string;
+      status: "ON" | "OFF";
+      notes: string | null;
+      reporterName: string | null;
+      updatedAt: Date | null;
+    }
+  >();
+
+  for (const rep of reports) {
+    reportByKey.set(`${rep.locationId}:${rep.reportDate}`, {
+      id: rep.id,
+      status: rep.status,
+      notes: rep.notes,
+      reporterName: rep.reporterName ?? null,
+      updatedAt: rep.updatedAt ?? null,
+    });
+  }
+
+  const allRows: OperatorHistoryRow[] = locations.map((loc) => {
+    const cells: Record<string, OperatorHistoryCell> = {};
+    let onDays = 0;
+    let offDays = 0;
+    let unreportedDays = 0;
+
+    for (const d of dates) {
+      const existing = reportByKey.get(`${loc.id}:${d}`);
+      if (existing) {
+        cells[d] = {
+          dateStr: d,
+          status: existing.status,
+          reportId: existing.id,
+          notes: existing.notes,
+          reporterName: existing.reporterName,
+          updatedAt: existing.updatedAt,
+        };
+        if (existing.status === "ON") onDays += 1;
+        else offDays += 1;
+      } else {
+        cells[d] = {
+          dateStr: d,
+          status: "UNREPORTED",
+          reportId: null,
+          notes: null,
+          reporterName: null,
+          updatedAt: null,
+        };
+        unreportedDays += 1;
+      }
+    }
+
+    const totalDays = dates.length;
+    return {
+      locationId: loc.id,
+      category: loc.category ?? "",
+      name: loc.name ?? loc.displayName,
+      displayName: loc.displayName,
+      cells,
+      onDays,
+      offDays,
+      unreportedDays,
+      activePct: percentOf(onDays, totalDays),
+    };
+  });
+
+  const filteredRows =
+    statusFilter === "ALL"
+      ? allRows
+      : allRows.filter((row) =>
+          dates.some((d) => row.cells[d]?.status === statusFilter)
+        );
+
+  return { dates, monthGroups, rows: filteredRows };
 }
 
 export function buildAuditRows(recap: DateRangeRecapResult) {

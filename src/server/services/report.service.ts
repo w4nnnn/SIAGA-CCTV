@@ -278,3 +278,46 @@ export async function getOperatorReportHistory(
     }),
   }));
 }
+
+export async function getAssignedLocationsForUser(user: SessionUser) {
+  const assignedIds =
+    user.role === "ADMIN" ? null : await getUserAssignedLocationIds(user.id);
+
+  if (assignedIds !== null && assignedIds.length === 0) {
+    return [];
+  }
+
+  const rows =
+    assignedIds === null
+      ? await db
+          .select()
+          .from(locations)
+          .where(eq(locations.isActive, true))
+          .orderBy(
+            asc(locations.sortOrder),
+            asc(locations.category),
+            asc(locations.name)
+          )
+      : await db
+          .select()
+          .from(locations)
+          .where(
+            and(
+              eq(locations.isActive, true),
+              inArray(locations.id, assignedIds)
+            )
+          )
+          .orderBy(
+            asc(locations.sortOrder),
+            asc(locations.category),
+            asc(locations.name)
+          );
+
+  return rows.map((loc) => ({
+    id: loc.id,
+    category: loc.category,
+    name: loc.name,
+    displayName: formatLocationDisplayName(loc),
+    sortOrder: loc.sortOrder,
+  }));
+}

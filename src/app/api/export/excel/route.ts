@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { assertAdmin, requireSessionUser } from "@/lib/auth";
+import { requireSessionUser } from "@/lib/auth";
 import { getDateRangeRecap } from "@/server/services/recap.service";
 import { generateExcelRecapBuffer } from "@/server/services/export.service";
 
 export async function GET(req: NextRequest) {
   const user = await requireSessionUser();
-  assertAdmin(user);
 
   const { searchParams } = new URL(req.url);
   const startDate = searchParams.get("startDate") ?? "";
@@ -19,12 +18,15 @@ export async function GET(req: NextRequest) {
       | "UNREPORTED"
       | null) ?? "ALL";
 
-  const recap = await getDateRangeRecap({
-    startDate,
-    endDate,
-    locationId,
-    status,
-  });
+  const recap = await getDateRangeRecap(
+    {
+      startDate,
+      endDate,
+      locationId,
+      status,
+    },
+    user
+  );
 
   const buffer = await generateExcelRecapBuffer(recap);
   const filename = `Rekap-SIAGA-CCTV-${recap.startDate}_sd_${recap.endDate}.xlsx`;

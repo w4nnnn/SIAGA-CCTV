@@ -3,15 +3,12 @@
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AlertTriangle,
   Calendar,
-  CheckCircle2,
   FileDown,
   FileSpreadsheet,
   Filter,
   Grid3X3,
   RotateCcw,
-  ShieldCheck,
   TableProperties,
 } from "lucide-react";
 import { buildExportDownloadUrl, getTodayDateInJakarta } from "@/lib/ui-state";
@@ -19,7 +16,6 @@ import type { DateRangeRecapResult } from "@/server/services/recap.service";
 import {
   buildActivityMatrix,
   buildAuditRows,
-  computeRecapKpis,
   detectActivePreset,
   getRangePreset,
 } from "@/lib/view-models";
@@ -70,8 +66,7 @@ export function DateRangeRecapView({
     [startDate, endDate, todayStr]
   );
 
-  // Hitung KPI, Matriks, dan Tabel Audit
-  const kpis = useMemo(() => computeRecapKpis(recap), [recap]);
+  // Hitung Matriks dan Tabel Audit
   const matrix = useMemo(() => buildActivityMatrix(recap), [recap]);
   const auditRows = useMemo(() => buildAuditRows(recap), [recap]);
 
@@ -290,91 +285,6 @@ export function DateRangeRecapView({
         </CardContent>
       </Card>
 
-      {/* Summary KPI Widgets (3 Cards) */}
-      <section
-        aria-label="Ringkasan Metrik Rekapitulasi"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-      >
-        <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-primary bg-card p-4 shadow-xs">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider">
-              Kepatuhan Lapor
-            </span>
-            <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <div className="font-heading text-3xl font-bold text-foreground">
-              {kpis.compliancePct}%
-            </div>
-            <span className="rounded-[0.25rem] border border-[var(--color-status-on-border)] bg-[var(--color-status-on-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-status-on)]">
-              {kpis.reportedCount} dari {kpis.scheduledCount} Shift
-            </span>
-          </div>
-          {/* Progress bar */}
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              style={{ width: `${Math.min(100, kpis.compliancePct)}%` }}
-              className="h-full bg-primary"
-            />
-          </div>
-        </Card>
-
-        <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-[var(--color-status-on-solid)] bg-card p-4 shadow-xs">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-status-on)]">
-              Hari Bebas Kendala
-            </span>
-            <CheckCircle2 className="size-4 text-[var(--color-status-on)]" aria-hidden="true" />
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <div className="font-heading text-3xl font-bold text-[var(--color-status-on)]">
-              {kpis.offFreeDays} Hari
-            </div>
-            <span className="rounded-[0.25rem] border border-[var(--color-status-on-border)] bg-[var(--color-status-on-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-status-on)]">
-              Reliabilitas {kpis.offFreePct}%
-            </span>
-          </div>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              style={{ width: `${Math.min(100, kpis.offFreePct)}%` }}
-              className="h-full bg-[var(--color-status-on-solid)]"
-            />
-          </div>
-        </Card>
-
-        <Card className="rounded-[0.5rem] border border-border border-t-[3px] border-t-[var(--color-status-off-solid)] bg-card p-4 shadow-xs">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-status-off)]">
-              Insiden Kendala Tercatat
-            </span>
-            <AlertTriangle className="size-4 text-[var(--color-status-off)]" aria-hidden="true" />
-          </div>
-          <div className="mt-2 flex items-baseline justify-between">
-            <div className="font-heading text-3xl font-bold text-[var(--color-status-off)]">
-              {kpis.incidentCount} Lokasi-Hari
-            </div>
-            <span
-              className={cn(
-                "rounded-[0.25rem] border px-2 py-0.5 text-[11px] font-semibold",
-                kpis.incidentCount > 0
-                  ? "border-[var(--color-status-off-border)] bg-[var(--color-status-off-surface)] text-[var(--color-status-off)]"
-                  : "border-border bg-muted/60 text-muted-foreground"
-              )}
-            >
-              {kpis.incidentCount > 0 ? "Perlu Evaluasi" : "Zero Downtime"}
-            </span>
-          </div>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              style={{
-                width: `${kpis.scheduledCount > 0 ? Math.min(100, (kpis.incidentCount / kpis.scheduledCount) * 100) : 0}%`,
-              }}
-              className="h-full bg-[var(--color-status-off-solid)]"
-            />
-          </div>
-        </Card>
-      </section>
-
       {/* Matriks Keaktifan (Tampil jika <= 31 hari) */}
       {matrix.dates.length > 0 && matrix.dates.length <= 31 && (
         <Card className="rounded-[0.5rem] border border-border bg-card shadow-xs">
@@ -412,38 +322,45 @@ export function DateRangeRecapView({
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-border bg-muted/40 text-[11px]">
-                    <TableHead className="font-heading font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    <TableHead
+                      rowSpan={2}
+                      className="sticky left-0 z-30 bg-muted/95 border-r border-border font-heading font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap align-middle"
+                    >
                       Lokasi Operasional
                     </TableHead>
-                    <TableHead className="font-heading font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      Tipe
-                    </TableHead>
-                    {matrix.dates.map((d) => (
+                    {matrix.monthGroups.map((group) => (
                       <TableHead
-                        key={d}
-                        className="text-center font-mono text-[10px] uppercase text-muted-foreground px-1 whitespace-nowrap"
+                        key={group.monthKey}
+                        colSpan={group.dates.length}
+                        className="text-center font-heading text-xs font-bold uppercase tracking-wider text-foreground border-b border-l border-border bg-muted/60 py-2"
                       >
-                        {d.slice(5)}
+                        {group.monthLabel}
                       </TableHead>
                     ))}
-                    <TableHead className="text-right font-heading font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      Reliabilitas
-                    </TableHead>
+                  </TableRow>
+                  <TableRow className="border-b border-border bg-muted/30 text-[10px]">
+                    {matrix.monthGroups.flatMap((group) =>
+                      group.dates.map((d) => (
+                        <TableHead
+                          key={d.dateStr}
+                          className="text-center font-mono text-[10px] font-bold text-muted-foreground px-1.5 py-1.5 border-l border-border/60 whitespace-nowrap"
+                        >
+                          {d.dayLabel}
+                        </TableHead>
+                      ))
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {matrix.rows.map((row) => (
-                    <TableRow key={row.locationId} className="border-b border-border/70">
-                      <TableCell className="font-heading text-xs font-semibold text-foreground whitespace-nowrap">
+                    <TableRow key={row.locationId} className="group border-b border-border/70 hover:bg-muted/30">
+                      <TableCell className="sticky left-0 z-20 bg-card group-hover:bg-muted/60 border-r border-border font-heading text-xs font-semibold text-foreground whitespace-nowrap">
                         {row.displayName}
-                      </TableCell>
-                      <TableCell>
-                        <CategoryBadge category={row.category} />
                       </TableCell>
                       {matrix.dates.map((d) => {
                         const cell = row.cells[d] ?? "UNREPORTED";
                         return (
-                          <TableCell key={d} className="p-1 text-center">
+                          <TableCell key={d} className="p-1 text-center border-l border-border/40">
                             {cell === "ON" ? (
                               <span
                                 title={`${d}: Normal (ON)`}
@@ -469,9 +386,6 @@ export function DateRangeRecapView({
                           </TableCell>
                         );
                       })}
-                      <TableCell className="text-right font-mono text-xs font-bold text-foreground whitespace-nowrap">
-                        {row.activePct}%
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
